@@ -1,7 +1,6 @@
 package io.ula.commands;
 
 import com.google.gson.JsonElement;
-import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -12,18 +11,15 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
 import java.awt.*;
-import java.awt.print.Paper;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import static io.ula.drng.*;
 
-public class permissionCmd {
+public class PermissionCmd {
     static Timer sync = new Timer();
     public static final LiteralArgumentBuilder<CommandSourceStack> permission = Commands.literal("permission")
 
@@ -62,10 +58,10 @@ public class permissionCmd {
                                                     player.sendMessage("已经拥有了该权限");
                                                     return 1;
                                                 }
-                                                player.addScoreboardTag(element.getAsString());
+                                                player.addScoreboardTag(pms);
                                                 player.sendMessage(String.format("%s权限成功鉴权",pms));
                                                 player.removePotionEffect(PotionEffectType.INVISIBILITY);
-                                                if(player.getGameMode() == GameMode.ADVENTURE || player.getGameMode() == GameMode.SURVIVAL)
+                                                if(player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR)
                                                     player.setAllowFlight(false);
                                                 return 1;
                                             }
@@ -84,12 +80,11 @@ public class permissionCmd {
                                         return suggestionsBuilder.buildFuture();
                                     }).executes(commandContext -> {
                                         Player player = (Player) commandContext.getSource().getSender();
-                                        String playerName = commandContext.getArgument("player",String.class);
                                         String context = commandContext.getArgument("permission",String.class);
                                         LOGGER.info(context);
                                         for(JsonElement pms : DRNG_PERMISSIONS.getKey("permissions_list").getAsJsonArray()){
                                             if(context.equals(pms.getAsString())){
-                                                if(player.getScoreboardTags().contains(pms.toString())) {
+                                                if(player.getScoreboardTags().contains(context)) {
                                                     player.removeScoreboardTag(pms.getAsString());
                                                     player.sendMessage(String.format("已移除玩家%s的%s权限",player.getName(),pms.getAsString()));
                                                     return 0;

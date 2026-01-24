@@ -1,7 +1,8 @@
 package io.ula;
 
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import io.ula.commands.permissionCmd;
+import io.ula.commands.ControlCmd;
+import io.ula.commands.PermissionCmd;
 import io.ula.config.ConfigFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,10 +21,13 @@ public final class drng extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS , commandsReloadableRegistrarEvent -> {
-            commandsReloadableRegistrarEvent.registrar().register(permissionCmd.buildpms);
-        });
+        ControlCmd.plugin = this;
         getServer().getPluginManager().registerEvents(new PlayerListener(this),this);
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS , commandsReloadableRegistrarEvent ->
+            commandsReloadableRegistrarEvent.registrar().register(PermissionCmd.buildpms));
+        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS , commandsReloadableRegistrarEvent ->
+                commandsReloadableRegistrarEvent.registrar().register(ControlCmd.buildCCmd));
+
     }
 
     @Override
