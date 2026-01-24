@@ -80,13 +80,15 @@ public class PermissionCmd {
                                         return suggestionsBuilder.buildFuture();
                                     }).executes(commandContext -> {
                                         Player player = (Player) commandContext.getSource().getSender();
+                                        String targetName = commandContext.getArgument("player",String.class);
                                         String context = commandContext.getArgument("permission",String.class);
                                         LOGGER.info(context);
                                         for(JsonElement pms : DRNG_PERMISSIONS.getKey("permissions_list").getAsJsonArray()){
                                             if(context.equals(pms.getAsString())){
-                                                if(player.getScoreboardTags().contains(context)) {
-                                                    player.removeScoreboardTag(pms.getAsString());
-                                                    player.sendMessage(String.format("已移除玩家%s的%s权限",player.getName(),pms.getAsString()));
+                                                Player target= Bukkit.getPlayer(targetName);
+                                                if(target.getScoreboardTags().contains(context)) {
+                                                    target.removeScoreboardTag(pms.getAsString());
+                                                    player.sendMessage(String.format("已移除玩家%s的%s权限",target.getName(),pms.getAsString()));
                                                     return 0;
                                                 }
                                             }
@@ -104,11 +106,8 @@ public class PermissionCmd {
                             .executes(commandContext -> {
                                 String content = commandContext.getArgument("player",String.class);
                                 CommandSender sender = commandContext.getSource().getSender();
-                                for(Player player : Bukkit.getOnlinePlayers()){
-                                    if(content.equals(player.getName()))
-                                        return 0;
-                                }
-                                sender.sendMessage(Component.text(String.format("未知的玩家\"%s\"",content)).color(TextColor.color(Color.RED.getRGB())));
+                                if(Bukkit.getPlayer(content) == null)
+                                    sender.sendMessage(Component.text(String.format("未知的玩家\"%s\"",content)).color(TextColor.color(Color.RED.getRGB())));
                                 return 0;
                             })
                             .requires(commandSourceStack -> commandSourceStack.getSender().isOp())
