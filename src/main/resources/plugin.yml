@@ -4,9 +4,3 @@ main: io.ula.drng
 api-version: '1.21.11'
 authors: [ _Achelous ]
 description: Desideraregio - Next基本插件
-
-commands:
-  permission:
-    description: 用于请求服务器中的各项权限
-    usage: 114514
-    aliases: [pms]

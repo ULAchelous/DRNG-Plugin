@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -32,9 +33,9 @@ public class PlayerListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
             BukkitTask login_time_limited = Bukkit.getScheduler().runTaskLater(plugin, () ->{
                 for(Player player : plugin.getServer().getOnlinePlayers())
-                    if(!findPlayerFromPmsList("tester", player.getName())) player.kick(Component.text("长时间未输入内测码").color(TextColor.color(Color.RED.getRGB())));
+                    if(!player.getScoreboardTags().contains("tester")) player.kick(Component.text("长时间未输入内测码").color(TextColor.color(Color.RED.getRGB())));
             },600L);
-            if(!findPlayerFromPmsList("tester", event.getPlayer().getName())){
+            if(!event.getPlayer().getScoreboardTags().contains("tester")){
             PotionEffect effect = new PotionEffect(
                     PotionEffectType.INVISIBILITY,
                     Integer.MAX_VALUE,
@@ -50,7 +51,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerBreakBlk(BlockBreakEvent event){
-        if(!findPlayerFromPmsList("tester", event.getPlayer().getName()))
+        if(!event.getPlayer().getScoreboardTags().contains("tester"))
             event.setCancelled(true);
     }
 
@@ -58,11 +59,16 @@ public class PlayerListener implements Listener {
     public void onTick(ServerTickStartEvent event){
         if(event.getTickNumber() % 20 == 0){
             for(Player player : plugin.getServer().getOnlinePlayers()){
-                if(!findPlayerFromPmsList("tester", player.getName())){
+                if(!player.getScoreboardTags().contains("tester")){
                     player.showTitle(Title.title(Component.text("请输入 ").color(TextColor.color(Color.RED.getRGB()))
                                     .append(Component.text("内测码").color(TextColor.color(Color.YELLOW.getRGB())))
                                     .append(Component.text(" 来加入游戏").color(TextColor.color(Color.RED.getRGB())))
                             , Component.empty()));
+                }
+                if(player.getScoreboardTags().contains("fly")){
+                    player.setAllowFlight(true);
+                }else if(player.getGameMode() != GameMode.CREATIVE || player.getGameMode() != GameMode.SPECTATOR){
+                    player.setAllowFlight(false);
                 }
             }
         }

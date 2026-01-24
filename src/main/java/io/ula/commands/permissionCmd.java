@@ -35,12 +35,12 @@ public class permissionCmd {
                                 return suggestionsBuilder.buildFuture();
                             })
                             .executes(commandContext -> {
-                                CommandSender player = commandContext.getSource().getSender();
+                                Player player = (Player)commandContext.getSource().getSender();
                                 String context = commandContext.getArgument("permissions",String.class);
                                 LOGGER.info(context);
                                 for(JsonElement pms : DRNG_PERMISSIONS.getKey("permissions_list").getAsJsonArray()){
                                     if(context.equals(pms.getAsString())){
-                                        if(findPlayerFromPmsList(pms.getAsString(),player.getName())) {
+                                        if(player.getScoreboardTags().contains(pms.getAsString())) {
                                             player.sendMessage(String.format("拥有%s权限: true", pms.getAsString()));
                                             return 0;
                                         }
@@ -58,20 +58,11 @@ public class permissionCmd {
                                         String context = commandContext.getArgument("pms_code",String.class);
                                         for(JsonElement element : PMS_CODES.getKey(pms).getAsJsonArray()){
                                             if(context.equals(element.getAsString())){
-                                                if(findPlayerFromPmsList(pms,player.getName())){
+                                                if(player.getScoreboardTags().contains(pms)){
                                                     player.sendMessage("已经拥有了该权限");
                                                     return 1;
                                                 }
-                                                sync.schedule(new TimerTask() {
-                                                    @Override
-                                                    public void run() {
-                                                        String p = pms;
-                                                        String pn = player.getName();
-                                                        DRNG_PERMISSIONS.getKey(p).getAsJsonArray().add(pn);
-                                                        DRNG_PERMISSIONS.write();
-                                                        DRNG_PERMISSIONS.reload();
-                                                    }
-                                                },1000);
+                                                player.addScoreboardTag(element.getAsString());
                                                 player.sendMessage(String.format("%s权限成功鉴权",pms));
                                                 player.removePotionEffect(PotionEffectType.INVISIBILITY);
                                                 if(player.getGameMode() == GameMode.ADVENTURE || player.getGameMode() == GameMode.SURVIVAL)
@@ -98,17 +89,8 @@ public class permissionCmd {
                                         LOGGER.info(context);
                                         for(JsonElement pms : DRNG_PERMISSIONS.getKey("permissions_list").getAsJsonArray()){
                                             if(context.equals(pms.getAsString())){
-                                                if(findPlayerFromPmsList(pms.getAsString(),player.getName())) {
-                                                    sync.schedule(new TimerTask() {
-                                                        @Override
-                                                        public void run() {
-                                                            JsonElement p = pms;
-                                                            String pn = playerName;
-                                                            DRNG_PERMISSIONS.getKey(p.getAsString()).getAsJsonArray().remove(getPlayerIndexFromPmsList(p.getAsString(),pn));
-                                                            DRNG_PERMISSIONS.write();;
-                                                            DRNG_PERMISSIONS.reload();
-                                                        }
-                                                    },900);
+                                                if(player.getScoreboardTags().contains(pms.toString())) {
+                                                    player.removeScoreboardTag(pms.getAsString());
                                                     player.sendMessage(String.format("已移除玩家%s的%s权限",player.getName(),pms.getAsString()));
                                                     return 0;
                                                 }
@@ -141,20 +123,4 @@ public class permissionCmd {
 
             .requires(commandSourceStack -> commandSourceStack.getSender() instanceof Player);
     public static final LiteralCommandNode<CommandSourceStack> buildpms = permission.build();
-    public static boolean findPlayerFromPmsList(String pms,String playerName){
-        for(JsonElement player : DRNG_PERMISSIONS.getKey(pms).getAsJsonArray()){
-            if(playerName.equals(player.getAsString())){
-                return true;
-            }
-        }
-        return false;
-    }
-    public static int getPlayerIndexFromPmsList(String pms,String playerName){
-        for(int i=0;i<DRNG_PERMISSIONS.getKey(pms).getAsJsonArray().size();i++){
-            if(playerName.equals(DRNG_PERMISSIONS.getKey(pms).getAsJsonArray().get(i).getAsString())){
-                return i;
-            }
-        }
-        return -1;
-    }
 }
