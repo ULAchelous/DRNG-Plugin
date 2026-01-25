@@ -1,11 +1,17 @@
 package io.ula;
 
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
+import io.papermc.paper.event.player.PlayerPickBlockEvent;
+import io.papermc.paper.event.player.PlayerPickItemEvent;
+import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,16 +19,22 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class PlayerListener implements Listener {
     private final JavaPlugin plugin;
+
+
 
     public PlayerListener(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -42,8 +54,8 @@ public class PlayerListener implements Listener {
                         false
                 );
                 event.getPlayer().clearActivePotionEffects();
-                event.getPlayer().setAllowFlight(true);
                 event.getPlayer().addPotionEffect(effect);
+                event.getPlayer().addScoreboardTag("invisibility_flag");
             }
             if(event.getPlayer().hasMetadata("been_controlled")){
                 event.getPlayer().removeMetadata("been_controlled", plugin);
@@ -54,7 +66,14 @@ public class PlayerListener implements Listener {
     public void onPlayerBreakBlk(BlockBreakEvent event){
         if(!event.getPlayer().getScoreboardTags().contains("tester"))
             event.setCancelled(true);
+        if(event.getPlayer().hasMetadata("controlling_player")){
+            java.util.UUID UUID = (java.util.UUID)event.getPlayer().getMetadata("controlling_player").get(0).value();
+            Player player = Bukkit.getPlayer(UUID);
+            player.breakBlock(event.getBlock());
+            event.setCancelled(true);
+        }
     }
+
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event){
@@ -64,9 +83,18 @@ public class PlayerListener implements Listener {
         if(event.getPlayer().hasMetadata("controlling_player")){
             java.util.UUID UUID = (java.util.UUID)event.getPlayer().getMetadata("controlling_player").get(0).value();
             Player player = Bukkit.getPlayer(UUID);
-            if(player != null) {
+
+            Map<BlockFace,Location> vectors = new HashMap<>();
+            vectors.put(BlockFace.NORTH,new Location(player.getWorld(),0,0,0.6));
+            vectors.put(BlockFace.SOUTH,new Location(player.getWorld(),0,0,-0.6));
+            vectors.put(BlockFace.EAST,new Location(player.getWorld(),-0.6,0,0));
+            vectors.put(BlockFace.WEST,new Location(player.getWorld(),0.6,0,0));
+            //存储被控制者移动方向（控制者朝向的反方向）
+            if(player.isOnline()) {
+                event.getPlayer().sendActionBar(Component.text(String.format("你正在控制%s!", player.getName())).color(TextColor.color(Color.RED.getRGB())));
                 player.sendActionBar(Component.text(String.format("你正在被 %s 控制!", event.getPlayer().getName())).color(TextColor.color(Color.RED.getRGB())));
                 player.teleport(event.getPlayer().getLocation());
+                player.teleport(player.getLocation().add(vectors.getOrDefault(event.getPlayer().getFacing(), new Location(player.getWorld(), 0, 0, 0))));
             }
         }
     }
@@ -80,8 +108,11 @@ public class PlayerListener implements Listener {
                                     .append(Component.text("内测码").color(TextColor.color(Color.YELLOW.getRGB())))
                                     .append(Component.text(" 来加入游戏").color(TextColor.color(Color.RED.getRGB())))
                             , Component.empty()));
+                }else if(player.getScoreboardTags().contains("invisibility_flag")){
+                    player.removePotionEffect(PotionEffectType.INVISIBILITY);
+                    player.removeScoreboardTag("invisibility_flag");
                 }
-                if(player.getScoreboardTags().contains("fly")){
+                if(player.getScoreboardTags().contains("fly") || player.getScoreboardTags().contains("invisibility_flag")){
                     player.setAllowFlight(true);
                 }else if(player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR){
                     player.setAllowFlight(false);

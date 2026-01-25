@@ -50,8 +50,6 @@ public class ControlCmd {
                                     false,
                                     false
                             ));
-                            playerobj.setAllowFlight(true);
-                            playerobj.setFlying(true);
                             playerobj.setMetadata("been_controlled", new FixedMetadataValue(plugin, player.getUniqueId()));//使用元数据标记被控制玩家，存储控制者
                             player.setMetadata("controlling_player", new FixedMetadataValue(plugin, playerobj.getUniqueId()));//使用元数据标记控制玩家，存储被控制者
                             player.teleport(playerobj.getLocation());
@@ -66,9 +64,7 @@ public class ControlCmd {
                 if(player.hasMetadata("controlling_player")){
                     Player target = Bukkit.getPlayer((java.util.UUID) player.getMetadata("controlling_player").get(0).value());
                     player.removeMetadata("controlling_player",plugin);
-                    if(target != null) {
-                        target.setAllowFlight(true);
-                        target.setFlying(true);
+                    if(target.isOnline()) {
                         target.removeMetadata("been_controlled", plugin);
                     }else{
                         player.sendMessage(Component.text("警告:控制对象离线").color(TextColor.color(Color.YELLOW.asRGB())));

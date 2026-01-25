@@ -60,9 +60,6 @@ public class PermissionCmd {
                                                 }
                                                 player.addScoreboardTag(pms);
                                                 player.sendMessage(String.format("%s权限成功鉴权",pms));
-                                                player.removePotionEffect(PotionEffectType.INVISIBILITY);
-                                                if(player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR)
-                                                    player.setAllowFlight(false);
                                                 return 1;
                                             }
                                         }
@@ -110,9 +107,8 @@ public class PermissionCmd {
                                     sender.sendMessage(Component.text(String.format("未知的玩家\"%s\"",content)).color(TextColor.color(Color.RED.asRGB())));
                                 return 0;
                             })
-                            .requires(commandSourceStack -> commandSourceStack.getSender().isOp())
                     )
-
+                    .requires(commandSourceStack -> commandSourceStack.getSender().isOp())
             )
 
             .requires(commandSourceStack -> commandSourceStack.getSender() instanceof Player);
