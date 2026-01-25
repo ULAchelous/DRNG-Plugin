@@ -19,6 +19,7 @@ public final class drng extends JavaPlugin {
 
     public static ConfigFile PMS_CODES = new ConfigFile("permission_codes.json");
     public static ConfigFile DRNG_PERMISSIONS = new ConfigFile("permissions.json");
+    public static ConfigFile PLAYER_TITLES = new ConfigFile("player_titles.json");
 
     @Override
     public void onEnable() {

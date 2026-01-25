@@ -68,10 +68,10 @@ public class ConfigFile {
         String list;
         try {
             list = new String(Files.readAllBytes(Path.of(file.toURI())));
-        }catch(IOException e){
+            jsonObject = JsonParser.parseString(list).getAsJsonObject();
+        }catch(Exception e){
             LOGGER.error(String.format("Failed to read config file \"%s\" : ",file_name) + e.getMessage());
             return;
         }
-        jsonObject = JsonParser.parseString(list).getAsJsonObject();
     }
 }
