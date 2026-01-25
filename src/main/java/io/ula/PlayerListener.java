@@ -1,6 +1,7 @@
 package io.ula;
 
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -8,6 +9,7 @@ import io.papermc.paper.event.player.AsyncChatEvent;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -35,6 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.MissingFormatArgumentException;
 
+import static io.ula.drng.LOGGER;
 import static io.ula.drng.PLAYER_TITLES;
 
 
@@ -83,19 +86,39 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerSendingMessages(AsyncChatEvent event){
+            Player player = event.getPlayer();
             PLAYER_TITLES.reload();
-            Component title = Component.text("");
-            try {
-                for (JsonElement element : PLAYER_TITLES.getKey(event.getPlayer().getName()).getAsJsonArray()) {
-                    title = title.append(Component.text(element.getAsJsonObject().get("content").getAsString())
-                            .append(Component.space())
-                            .color(TextColor.fromCSSHexString(element.getAsJsonObject().get("color").getAsString())));
+            if(PLAYER_TITLES.has(player.getName())){
+                Component component = Component.text("");
+                try{
+                    for(JsonElement title : PLAYER_TITLES.getKey(player.getName()).getAsJsonArray()){
+                        try {
+                            component = component
+                                    .append(Component.text("["))
+                                    .append(GsonComponentSerializer.gson().deserialize(title.toString()))//title component
+                                    .append(Component.text("]"))
+                                    .append(Component.space())//spacer
+                            ;
+                        }catch(Exception e){
+                            player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.asRGB())));
+                            LOGGER.error("Error in ./config/player_titles.json");
+                            LOGGER.error("Not a valid Component object!");
+                            return;
+                        }
+                    }
+                    component = component
+                            .append(Component.text(String.format("<%s> ",player.getName())))
+                            .append(event.message());//original message
+                    player.sendMessage(component);
+                    event.setCancelled(true);
+                }catch(ClassCastException e){
+                    player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.asRGB())));
+                    LOGGER.error("Error in ./config/player_titles.json");
+                    LOGGER.error(String.format("\"%s\" : ...<(HERE)",player.getName()));
+                    LOGGER.error("Wrong JsonElement,need JsonArray!");
                 }
-                title = title.append(Component.text(String.format("<%s> ",event.getPlayer().getName())));
-                event.getPlayer().sendMessage(title.append(event.message()));
-                event.setCancelled(true);
-            }catch(JsonParseException e){
-                event.getPlayer().sendMessage(Component.text(String.format("警告: 玩家%s的头衔出现错误",event.getPlayer().getName())).color(TextColor.color(Color.YELLOW.asRGB())));
+            }else{
+                PLAYER_TITLES.addKey(player.getName(),new JsonArray());
             }
     }
 

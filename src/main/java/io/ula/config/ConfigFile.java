@@ -54,6 +54,8 @@ public class ConfigFile {
 
     public JsonElement getKey(String name){return jsonObject.get(name);}
 
+    public Boolean has(String name){return  jsonObject.has(name);};
+
     public void write(){
 
         try {

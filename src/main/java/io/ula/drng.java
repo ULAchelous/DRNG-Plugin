@@ -3,7 +3,6 @@ package io.ula;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.ula.commands.ControlCmd;
 import io.ula.commands.PermissionCmd;
-import io.ula.commands.SayJsonCmd;
 import io.ula.config.ConfigFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,8 +28,6 @@ public final class drng extends JavaPlugin {
             commandsReloadableRegistrarEvent.registrar().register(PermissionCmd.buildpms));
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS , commandsReloadableRegistrarEvent ->
                 commandsReloadableRegistrarEvent.registrar().register(ControlCmd.buildCCmd));
-        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS , commandsReloadableRegistrarEvent ->
-                commandsReloadableRegistrarEvent.registrar().register(SayJsonCmd.buildSayJsonCmd));
     }
 
     @Override
