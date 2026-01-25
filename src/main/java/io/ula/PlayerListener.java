@@ -9,6 +9,7 @@ import io.papermc.paper.event.player.AsyncChatEvent;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
@@ -51,11 +52,19 @@ public class PlayerListener implements Listener {
     }
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerJoin(PlayerJoinEvent event) {
+            Player player = event.getPlayer();
+            Component loginMsg = Component.text("");
+            if(PLAYER_TITLES.has(player.getName()))
+                loginMsg = loginMsg.append(getPlayerTitles(player));
+            loginMsg = loginMsg.append(Component.text(player.getName()))
+                    .append(Component.text("，欢迎回来～").decorate(TextDecoration.BOLD));
+            event.joinMessage(loginMsg);//欢迎消息
+
             BukkitTask login_time_limited = Bukkit.getScheduler().runTaskLater(plugin, () ->{
-                for(Player player : plugin.getServer().getOnlinePlayers())
-                    if(!player.getScoreboardTags().contains("tester")) player.kick(Component.text("长时间未输入内测码").color(TextColor.color(Color.RED.asRGB())));
-            },600L);
-            if(!event.getPlayer().getScoreboardTags().contains("tester")){
+                for(Player pl : plugin.getServer().getOnlinePlayers())
+                    if(!pl.getScoreboardTags().contains("tester")) pl.kick(Component.text("长时间未输入内测码").color(TextColor.color(Color.RED.asRGB())));
+            },600L);//超时踢出
+            if(!player.getScoreboardTags().contains("tester")){
                 PotionEffect effect = new PotionEffect(
                         PotionEffectType.INVISIBILITY,
                         Integer.MAX_VALUE,
@@ -63,12 +72,12 @@ public class PlayerListener implements Listener {
                         false,
                         false
                 );
-                event.getPlayer().clearActivePotionEffects();
-                event.getPlayer().addPotionEffect(effect);
-                event.getPlayer().addScoreboardTag("invisibility_flag");
+                player.clearActivePotionEffects();
+                player.addPotionEffect(effect);
+                player.addScoreboardTag("invisibility_flag");
             }
-            if(event.getPlayer().hasMetadata("been_controlled")){
-                event.getPlayer().removeMetadata("been_controlled", plugin);
+            if(player.hasMetadata("been_controlled")){
+                player.removeMetadata("been_controlled", plugin);
             }
     }
 
@@ -87,38 +96,12 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerSendingMessages(AsyncChatEvent event){
             Player player = event.getPlayer();
-            PLAYER_TITLES.reload();
-            if(PLAYER_TITLES.has(player.getName())){
-                Component component = Component.text("");
-                try{
-                    for(JsonElement title : PLAYER_TITLES.getKey(player.getName()).getAsJsonArray()){
-                        try {
-                            component = component
-                                    .append(Component.text("["))
-                                    .append(GsonComponentSerializer.gson().deserialize(title.toString()))//title component
-                                    .append(Component.text("]"))
-                                    .append(Component.space())//spacer
-                            ;
-                        }catch(Exception e){
-                            player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.asRGB())));
-                            LOGGER.error("Error in ./config/player_titles.json");
-                            LOGGER.error("Not a valid Component object!");
-                            return;
-                        }
-                    }
-                    component = component
-                            .append(Component.text(String.format("<%s> ",player.getName())))
-                            .append(event.message());//original message
-                    player.sendMessage(component);
-                    event.setCancelled(true);
-                }catch(ClassCastException e){
-                    player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.asRGB())));
-                    LOGGER.error("Error in ./config/player_titles.json");
-                    LOGGER.error(String.format("\"%s\" : ...<(HERE)",player.getName()));
-                    LOGGER.error("Wrong JsonElement,need JsonArray!");
-                }
-            }else{
-                PLAYER_TITLES.addKey(player.getName(),new JsonArray());
+            if(PLAYER_TITLES.has(player.getName())) {
+                Component message = getPlayerTitles(player)
+                        .append(Component.text(String.format("<%s> ",player.getName())))
+                        .append(event.message());
+                player.sendMessage(message);
+                event.setCancelled(true);
             }
     }
 
@@ -168,4 +151,32 @@ public class PlayerListener implements Listener {
         }
     }
 
+    private Component getPlayerTitles(Player player) {
+        PLAYER_TITLES.reload();
+        Component component = Component.text("");
+        try {
+            for (JsonElement title : PLAYER_TITLES.getKey(player.getName()).getAsJsonArray()) {
+                try {
+                    component = component
+                            .append(Component.text("["))
+                            .append(GsonComponentSerializer.gson().deserialize(title.toString()))//title component
+                            .append(Component.text("]"))
+                            .append(Component.space())//spacer
+                    ;
+                } catch (Exception e) {
+                    player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.asRGB())));
+                    LOGGER.error("Error in ./config/player_titles.json");
+                    LOGGER.error("Not a valid Component object!");
+                    return Component.text("");
+                }
+            }
+        } catch (ClassCastException e) {
+            player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.asRGB())));
+            LOGGER.error("Error in ./config/player_titles.json");
+            LOGGER.error(String.format("\"%s\" : ...<(HERE)", player.getName()));
+            LOGGER.error("Wrong JsonElement,need JsonArray!");
+            return Component.text("");
+        }
+        return component;
+    }
 }
