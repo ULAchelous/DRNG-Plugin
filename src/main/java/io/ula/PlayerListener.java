@@ -59,7 +59,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event){
         if(event.getPlayer().hasMetadata("been_controlled")){
-            event.setCancelled(true);
+            event.setCancelled(true);//通过玩家的元数据检测玩家是否被控制
         }
         if(event.getPlayer().hasMetadata("controlling_player")){
             java.util.UUID UUID = (java.util.UUID)event.getPlayer().getMetadata("controlling_player").get(0).value();

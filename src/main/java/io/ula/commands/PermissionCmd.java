@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
@@ -20,7 +21,6 @@ import java.util.Timer;
 import static io.ula.drng.*;
 
 public class PermissionCmd {
-    static Timer sync = new Timer();
     public static final LiteralArgumentBuilder<CommandSourceStack> permission = Commands.literal("permission")
 
             .then(Commands.literal("request")
@@ -44,7 +44,7 @@ public class PermissionCmd {
                                         return 0;
                                     }
                                 }
-                                player.sendMessage(Component.text(String.format("未知的服务器权限\"%s\"",context)).color(TextColor.color(Color.RED.getRGB())));
+                                player.sendMessage(Component.text(String.format("未知的服务器权限\"%s\"",context)).color(TextColor.color(Color.RED.asRGB())));
                                 return 0;
                             })
                             .then(Commands.argument("pms_code",StringArgumentType.string())
@@ -66,7 +66,7 @@ public class PermissionCmd {
                                                 return 1;
                                             }
                                         }
-                                        player.sendMessage(Component.text("授权码错误").color(TextColor.color(Color.RED.getRGB())));
+                                        player.sendMessage(Component.text("授权码错误").color(TextColor.color(Color.RED.asRGB())));
                                         return 0;
                                     }))
                     )
@@ -93,7 +93,7 @@ public class PermissionCmd {
                                                 }
                                             }
                                         }
-                                        player.sendMessage(Component.text(String.format("未知的服务器权限\"%s\"",context)).color(TextColor.color(Color.RED.getRGB())));
+                                        player.sendMessage(Component.text(String.format("未知的服务器权限\"%s\"",context)).color(TextColor.color(Color.RED.asRGB())));
                                         return 0;
                                     })
 
@@ -107,7 +107,7 @@ public class PermissionCmd {
                                 String content = commandContext.getArgument("player",String.class);
                                 CommandSender sender = commandContext.getSource().getSender();
                                 if(Bukkit.getPlayer(content) == null)
-                                    sender.sendMessage(Component.text(String.format("未知的玩家\"%s\"",content)).color(TextColor.color(Color.RED.getRGB())));
+                                    sender.sendMessage(Component.text(String.format("未知的玩家\"%s\"",content)).color(TextColor.color(Color.RED.asRGB())));
                                 return 0;
                             })
                             .requires(commandSourceStack -> commandSourceStack.getSender().isOp())
