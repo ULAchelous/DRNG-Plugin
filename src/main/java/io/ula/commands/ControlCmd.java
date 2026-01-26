@@ -5,6 +5,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
@@ -15,24 +17,20 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.UUID;
+
 public class ControlCmd {
     public static JavaPlugin plugin;
     public static final LiteralArgumentBuilder<CommandSourceStack> cCmd = Commands.literal("control")
-            .then(Commands.argument("player", StringArgumentType.string())
-                    .suggests((commandContext, suggestionsBuilder) -> {
-                        for(Player player : Bukkit.getOnlinePlayers()){
-                            suggestionsBuilder.suggest(player.getName());
-                        }
-                        return suggestionsBuilder.buildFuture();
-                    })
+            .then(Commands.argument("player", ArgumentTypes.player())
                     .executes(commandContext -> {
                         Player player = (Player)commandContext.getSource().getSender();
-                        String context = commandContext.getArgument("player",String.class);
+                        PlayerSelectorArgumentResolver playerSelector = commandContext.getArgument("player", PlayerSelectorArgumentResolver.class);
                         if(player.hasMetadata("controlling_player")){
                             player.sendMessage(Component.text("无法控制(未退出正在进行的控制)").color(TextColor.color(Color.RED.asRGB())));
                             return 0;
                         }
-                        Player playerobj = Bukkit.getPlayer(context);
+                        Player playerobj = playerSelector.resolve(commandContext.getSource()).getFirst();
                         if(playerobj != null) {
                             if (playerobj.equals(player)) {
                                 player.sendMessage(Component.text("无法控制(对象为自身)").color(TextColor.color(Color.RED.asRGB())));
@@ -53,7 +51,7 @@ public class ControlCmd {
                             player.setMetadata("controlling_player", new FixedMetadataValue(plugin, playerobj.getUniqueId()));//使用元数据标记控制玩家，存储被控制者
                             player.teleport(playerobj.getLocation());
                         }else {
-                            player.sendMessage(Component.text(String.format("未知的玩家\"%s\"", context)).color(TextColor.color(java.awt.Color.RED.getRGB())));
+                            player.sendMessage(Component.text("未知的玩家").color(TextColor.color(java.awt.Color.RED.getRGB())));
                         }
                         return 0;
                     })
@@ -61,7 +59,7 @@ public class ControlCmd {
             .then(Commands.literal("stop").executes(commandContext -> {
                 Player player = (Player)commandContext.getSource().getSender();
                 if(player.hasMetadata("controlling_player")){
-                    Player target = Bukkit.getPlayer((java.util.UUID) player.getMetadata("controlling_player").get(0).value());
+                    Player target = Bukkit.getPlayer((UUID) player.getMetadata("controlling_player").get(0).value());
                     player.removeMetadata("controlling_player",plugin);
                     if(target.isOnline()) {
                         target.removeMetadata("been_controlled", plugin);

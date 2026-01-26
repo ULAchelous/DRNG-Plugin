@@ -2,6 +2,7 @@ package io.ula;
 
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
 import com.google.gson.JsonElement;
+import io.papermc.paper.ban.BanListType;
 import io.papermc.paper.event.player.AsyncChatEvent;
 
 import net.kyori.adventure.text.Component;
@@ -19,6 +20,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -30,8 +32,7 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.ula.drng.LOGGER;
-import static io.ula.drng.PLAYER_TITLES;
+import static io.ula.drng.*;
 
 
 public class PlayerListener implements Listener {
@@ -51,6 +52,10 @@ public class PlayerListener implements Listener {
             loginMsg = loginMsg.append(Component.text(player.getName()))
                     .append(Component.text("，欢迎回来～").decorate(TextDecoration.BOLD));
             event.joinMessage(loginMsg);//欢迎消息
+
+            if(BANNED_PLAYERS.has(player.getName())&&!player.isBanned()){
+                BANNED_PLAYERS.removeKey(player.getName());
+            }
 
             BukkitTask login_time_limited = Bukkit.getScheduler().runTaskLater(plugin, () ->{
                 for(Player pl : plugin.getServer().getOnlinePlayers())
@@ -117,6 +122,20 @@ public class PlayerListener implements Listener {
                 player.sendActionBar(Component.text(String.format("你正在被 %s 控制!", event.getPlayer().getName())).color(TextColor.color(Color.RED.asRGB())));
                 player.teleport(event.getPlayer().getLocation());
                 player.teleport(player.getLocation().add(vectors.getOrDefault(event.getPlayer().getFacing(), new Location(player.getWorld(), 0, 0, 0))));
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerBanned(PlayerKickEvent event){
+        Player player = event.getPlayer();
+        if(BANNED_PLAYERS.has(player.getName())){
+            try{
+                Component banReason = GsonComponentSerializer.gson()
+                        .deserializeFromTree(BANNED_PLAYERS.getKey(player.getName()));
+                event.reason(banReason);
+            }catch(Exception e){
+                LOGGER.error(String.format("Failed to load the ban reason for %s(from ./config/dr-ng/banned_players.json)",player.getName()));
             }
         }
     }

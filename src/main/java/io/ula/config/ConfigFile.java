@@ -1,8 +1,6 @@
 package io.ula.config;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jspecify.annotations.NonNull;
@@ -18,6 +16,9 @@ import static io.ula.drng.serverRoot;
 public class ConfigFile {
     private final Logger LOGGER = LogManager.getLogger(PLG_ID);
     private JsonObject jsonObject = new JsonObject();
+    private Gson gson = new GsonBuilder()
+            .setPrettyPrinting()
+            .create();
     private File file;
     private String file_name;
     public ConfigFile(@NonNull String name){
@@ -52,6 +53,8 @@ public class ConfigFile {
     public void addKey(String name,Number key){jsonObject.addProperty(name,key);write();reload();}
     public void addKey(String name,JsonElement key){jsonObject.add(name,key);write();reload();}
 
+    public void removeKey(String name){jsonObject.remove(name);write();reload();}
+
     public JsonElement getKey(String name){return jsonObject.get(name);}
 
     public Boolean has(String name){return  jsonObject.has(name);};
@@ -59,7 +62,7 @@ public class ConfigFile {
     public void write(){
 
         try {
-            Files.write(Path.of(file.toURI()), jsonObject.toString().getBytes());
+            Files.write(Path.of(file.toURI()), gson.toJson(jsonObject).getBytes());
         }catch(IOException e){
             LOGGER.error(String.format("Failed to write config file \"%s\" : ",file_name)+e.getMessage());
             return;

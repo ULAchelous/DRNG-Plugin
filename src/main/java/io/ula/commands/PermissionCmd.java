@@ -6,14 +6,19 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerPortalEvent;
 
 import java.awt.*;
+import java.util.List;
+import java.util.Map;
 
 import static io.ula.drng.*;
 
@@ -66,7 +71,7 @@ public class PermissionCmd {
                     )
             )
             .then(Commands.literal("remove")//用于移除玩家的服务器权限
-                    .then(Commands.argument("player",StringArgumentType.string())
+                    .then(Commands.argument("player", ArgumentTypes.players())
                             .then(Commands.argument("permission",StringArgumentType.string())
                                     .suggests((commandContext, suggestionsBuilder) -> {
                                         for(JsonElement pms : DRNG_PERMISSIONS.getKey("permissions_list").getAsJsonArray())
@@ -74,36 +79,24 @@ public class PermissionCmd {
                                         return suggestionsBuilder.buildFuture();
                                     }).executes(commandContext -> {
                                         Player player = (Player) commandContext.getSource().getSender();
-                                        String targetName = commandContext.getArgument("player",String.class);
-                                        String context = commandContext.getArgument("permission",String.class);
-                                        LOGGER.info(context);
+                                        String pmsName = commandContext.getArgument("permission",String.class);
+                                        List<Player> targets = commandContext.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(commandContext.getSource());
                                         for(JsonElement pms : DRNG_PERMISSIONS.getKey("permissions_list").getAsJsonArray()){
-                                            if(context.equals(pms.getAsString())){
-                                                Player target= Bukkit.getPlayer(targetName);
-                                                if(target.getScoreboardTags().contains(context)) {
-                                                    target.removeScoreboardTag(pms.getAsString());
-                                                    player.sendMessage(String.format("已移除玩家%s的%s权限",target.getName(),pms.getAsString()));
-                                                    return 0;
+                                            if(pmsName.equals(pms.getAsString())){
+                                                for(Player target : targets) {
+                                                    if (target.getScoreboardTags().contains(pmsName)) {
+                                                        target.removeScoreboardTag(pms.getAsString());
+                                                        player.sendMessage(String.format("已移除玩家%s的%s权限", target.getName(), pms.getAsString()));
+                                                    }
                                                 }
+                                                return 0;
                                             }
                                         }
-                                        player.sendMessage(Component.text(String.format("未知的服务器权限\"%s\"",context)).color(TextColor.color(Color.RED.asRGB())));
+                                        player.sendMessage(Component.text(String.format("未知的服务器权限\"%s\"",pmsName)).color(TextColor.color(Color.RED.asRGB())));
                                         return 0;
                                     })
 
                             )
-                            .suggests((commandContext, suggestionsBuilder) -> {
-                                for(Player player : Bukkit.getOnlinePlayers())
-                                    suggestionsBuilder.suggest(player.getName());
-                                return suggestionsBuilder.buildFuture();
-                            })
-                            .executes(commandContext -> {
-                                String content = commandContext.getArgument("player",String.class);
-                                CommandSender sender = commandContext.getSource().getSender();
-                                if(Bukkit.getPlayer(content) == null)
-                                    sender.sendMessage(Component.text(String.format("未知的玩家\"%s\"",content)).color(TextColor.color(Color.RED.asRGB())));
-                                return 0;
-                            })
                     )
                     .requires(commandSourceStack -> commandSourceStack.getSender().isOp())
             )
