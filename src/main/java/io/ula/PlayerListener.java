@@ -1,5 +1,6 @@
 package io.ula;
 
+import com.destroystokyo.paper.event.player.PlayerConnectionCloseEvent;
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
 import com.google.gson.JsonElement;
 import io.papermc.paper.ban.BanListType;
@@ -10,23 +11,25 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import org.bukkit.*;
+import org.bukkit.Color;
 import org.bukkit.block.BlockFace;
+import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.Color;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -53,6 +56,15 @@ public class PlayerListener implements Listener {
                     .append(Component.text("，欢迎回来～").decorate(TextDecoration.BOLD));
             event.joinMessage(loginMsg);//欢迎消息
 
+            if(!player.hasMetadata("deathCount"))
+                player.setMetadata("deathCount", new FixedMetadataValue(plugin,0));
+            if(!player.hasMetadata("digCount"))
+                player.setMetadata("digCount", new FixedMetadataValue(plugin,0));
+            if(!player.hasMetadata("deathCountCache"))
+                player.setMetadata("deathCountCache", new FixedMetadataValue(plugin,0));
+            if(!player.hasMetadata("digCountCache"))
+                player.setMetadata("digCountCache", new FixedMetadataValue(plugin,0));
+            ScoreBoardHelper.createObjective(player);
 
             BukkitTask login_time_limited = Bukkit.getScheduler().runTaskLater(plugin, () ->{
                 for(Player pl : plugin.getServer().getOnlinePlayers())
@@ -76,15 +88,39 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event){
+        ScoreBoardHelper.removeObjective(event.getPlayer());
+    }
+
+    @EventHandler
     public void onPlayerBreakBlk(BlockBreakEvent event){
+        Player player = event.getPlayer();
         if(!event.getPlayer().getScoreboardTags().contains("tester"))
             event.setCancelled(true);
         if(event.getPlayer().hasMetadata("controlling_player")){
-            java.util.UUID UUID = (java.util.UUID)event.getPlayer().getMetadata("controlling_player").get(0).value();
-            Player player = Bukkit.getPlayer(UUID);
-            player.breakBlock(event.getBlock());
+            java.util.UUID UUID = (java.util.UUID)event.getPlayer().getMetadata("controlling_player").getFirst().value();
+            Player target = Bukkit.getPlayer(UUID);
+            target.breakBlock(event.getBlock());
+            target.setMetadata("digCountCache",new FixedMetadataValue(plugin,target.getMetadata("digCount").getFirst().asInt()));
+            target.setMetadata("digCount",new FixedMetadataValue(plugin,target.getMetadata("digCount").getFirst().asInt()+1));
+            ScoreBoardHelper.updateScores(target);
             event.setCancelled(true);
         }
+        player.setMetadata("digCountCache",new FixedMetadataValue(plugin,player.getMetadata("digCount").getFirst().asInt()));
+        player.setMetadata("digCount",new FixedMetadataValue(plugin,player.getMetadata("digCount").getFirst().asInt()+1));
+        ScoreBoardHelper.updateScores(player);
+    }
+
+    @EventHandler
+    public void onPlayerDying(PlayerDeathEvent event){
+        Player player = event.getPlayer();
+        if(player.getScoreboardTags().contains("undying")){
+            player.playEffect(player.getLocation(), Effect.END_PORTAL_FRAME_FILL,0);
+            event.setCancelled(true);
+        }
+        player.setMetadata("deathCountCache",new FixedMetadataValue(plugin,player.getMetadata("deathCount").getFirst().asInt()));
+        player.setMetadata("deathCount",new FixedMetadataValue(plugin,player.getMetadata("deathCount").getFirst().asInt()+1));
+        ScoreBoardHelper.updateScores(player);
     }
 
     @EventHandler
@@ -105,7 +141,7 @@ public class PlayerListener implements Listener {
             event.setCancelled(true);//通过玩家的元数据检测玩家是否被控制
         }
         if(event.getPlayer().hasMetadata("controlling_player")){
-            java.util.UUID UUID = (java.util.UUID)event.getPlayer().getMetadata("controlling_player").get(0).value();
+            java.util.UUID UUID = (java.util.UUID)event.getPlayer().getMetadata("controlling_player").getFirst().value();
             Player player = Bukkit.getPlayer(UUID);
 
             Map<BlockFace,Location> vectors = new HashMap<>();
@@ -141,7 +177,7 @@ public class PlayerListener implements Listener {
                 }else if(player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR){
                     player.setAllowFlight(false);
                 }
-            }
+            }//内测相关逻辑
         }
     }
 

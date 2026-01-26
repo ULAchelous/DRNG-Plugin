@@ -24,6 +24,8 @@ public final class drng extends JavaPlugin {
     public void onEnable() {
         ControlCmd.plugin = this;
         //为命令类的plugin对象传值
+        ScoreBoardHelper.init(this);
+
         getServer().getPluginManager().registerEvents(new PlayerListener(this),this);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS , commandsReloadableRegistrarEvent ->
             commandsReloadableRegistrarEvent.registrar().register(PermissionCmd.buildpms));
