@@ -20,6 +20,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
@@ -103,12 +104,12 @@ public class PlayerListener implements Listener {
             target.breakBlock(event.getBlock());
             target.setMetadata("digCountCache",new FixedMetadataValue(plugin,target.getMetadata("digCount").getFirst().asInt()));
             target.setMetadata("digCount",new FixedMetadataValue(plugin,target.getMetadata("digCount").getFirst().asInt()+1));
-            ScoreBoardHelper.updateScores(target);
+            ScoreBoardHelper.updateScores(target,2);
             event.setCancelled(true);
         }
         player.setMetadata("digCountCache",new FixedMetadataValue(plugin,player.getMetadata("digCount").getFirst().asInt()));
         player.setMetadata("digCount",new FixedMetadataValue(plugin,player.getMetadata("digCount").getFirst().asInt()+1));
-        ScoreBoardHelper.updateScores(player);
+        ScoreBoardHelper.updateScores(player,2);
     }
 
     @EventHandler
@@ -120,7 +121,14 @@ public class PlayerListener implements Listener {
         }
         player.setMetadata("deathCountCache",new FixedMetadataValue(plugin,player.getMetadata("deathCount").getFirst().asInt()));
         player.setMetadata("deathCount",new FixedMetadataValue(plugin,player.getMetadata("deathCount").getFirst().asInt()+1));
-        ScoreBoardHelper.updateScores(player);
+        ScoreBoardHelper.updateScores(player,1);
+    }
+
+    @EventHandler
+    public void onEntityGetDamage(EntityDamageEvent event){
+        if (event.getEntity() instanceof Player){
+            ScoreBoardHelper.updateScores((Player) event.getEntity(),3);
+        }
     }
 
     @EventHandler

@@ -33,13 +33,16 @@ public class ScoreBoardHelper {
                 .decorate(TextDecoration.ITALIC)
                 .decorate(TextDecoration.BOLD);
         Objective sidebar= scoreboard.registerNewObjective(player.getName(), Criteria.DUMMY, server_name);
+        Objective health_display = scoreboard.registerNewObjective("health",Criteria.HEALTH,Component.empty());
 
+        health_display.getScore("health").setScore(0);
         sidebar.getScore("§e欢迎参加测试！").setScore(3);
         sidebar.getScore(String.format("死亡计数: §b§l%d",player.getMetadata("deathCount").getFirst().asInt())).setScore(2);
         sidebar.getScore(String.format("挖掘计数: §b§l%d",player.getMetadata("digCount").getFirst().asInt())).setScore(1);
 
+        sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
+        health_display.setDisplaySlot(DisplaySlot.PLAYER_LIST);
         player.setScoreboard(scoreboard);
-        player.setPlayerListFooter(LegacyComponentSerializer.legacyAmpersand().serialize(server_name));
         objectives.put(player.getUniqueId(),sidebar);
     }
 
@@ -48,12 +51,24 @@ public class ScoreBoardHelper {
         player.setScoreboard(scoreboardManager.getMainScoreboard());
     }
 
-    public static void updateScores(Player player){
-            Objective objective = objectives.get(player.getUniqueId());
-            //更新数值
-            player.getScoreboard().resetScores(String.format("死亡计数: §b§l%d",player.getMetadata("deathCountCache").getFirst().asInt()));
-            player.getScoreboard().resetScores(String.format("挖掘计数: §b§l%d",player.getMetadata("digCountCache").getFirst().asInt()));
-            objective.getScore(String.format("死亡计数: §b§l%d",player.getMetadata("deathCount").getFirst().asInt())).setScore(2);
-            objective.getScore(String.format("挖掘计数: §b§l%d",player.getMetadata("digCount").getFirst().asInt())).setScore(1);
+    public static void updateScores(Player player,int type) {
+        Objective objective = objectives.get(player.getUniqueId());
+        //更新数值
+        switch(type) {
+            case 1:
+                player.getScoreboard().resetScores(String.format("死亡计数: §b§l%d", player.getMetadata("deathCountCache").getFirst().asInt()));
+                objective.getScore(String.format("死亡计数: §b§l%d", player.getMetadata("deathCount").getFirst().asInt())).setScore(2);
+                break;
+            case 2:
+                player.getScoreboard().resetScores(String.format("挖掘计数: §b§l%d", player.getMetadata("digCountCache").getFirst().asInt()));
+                objective.getScore(String.format("挖掘计数: §b§l%d", player.getMetadata("digCount").getFirst().asInt())).setScore(1);
+                break;
+            case 3:
+                for(Objective obj : player.getScoreboard().getObjectives()){
+                    if(obj.getName().equals("health")){
+                        obj.getScore("health").setScore((int)player.getHealth());
+                    }
+                }
+        }
     }
 }
