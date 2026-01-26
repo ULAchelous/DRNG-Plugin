@@ -43,7 +43,7 @@ public class PlayerListener implements Listener {
     public PlayerListener(JavaPlugin plugin) {
         this.plugin = plugin;
     }
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
             Player player = event.getPlayer();
             Component loginMsg = Component.text("");
@@ -53,9 +53,6 @@ public class PlayerListener implements Listener {
                     .append(Component.text("，欢迎回来～").decorate(TextDecoration.BOLD));
             event.joinMessage(loginMsg);//欢迎消息
 
-            if(BANNED_PLAYERS.has(player.getName())&&!player.isBanned()){
-                BANNED_PLAYERS.removeKey(player.getName());
-            }
 
             BukkitTask login_time_limited = Bukkit.getScheduler().runTaskLater(plugin, () ->{
                 for(Player pl : plugin.getServer().getOnlinePlayers())
@@ -122,20 +119,6 @@ public class PlayerListener implements Listener {
                 player.sendActionBar(Component.text(String.format("你正在被 %s 控制!", event.getPlayer().getName())).color(TextColor.color(Color.RED.asRGB())));
                 player.teleport(event.getPlayer().getLocation());
                 player.teleport(player.getLocation().add(vectors.getOrDefault(event.getPlayer().getFacing(), new Location(player.getWorld(), 0, 0, 0))));
-            }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerBanned(PlayerKickEvent event){
-        Player player = event.getPlayer();
-        if(BANNED_PLAYERS.has(player.getName())){
-            try{
-                Component banReason = GsonComponentSerializer.gson()
-                        .deserializeFromTree(BANNED_PLAYERS.getKey(player.getName()));
-                event.reason(banReason);
-            }catch(Exception e){
-                LOGGER.error(String.format("Failed to load the ban reason for %s(from ./config/dr-ng/banned_players.json)",player.getName()));
             }
         }
     }

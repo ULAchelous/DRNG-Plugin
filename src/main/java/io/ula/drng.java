@@ -1,7 +1,6 @@
 package io.ula;
 
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import io.ula.commands.BanExtraCmd;
 import io.ula.commands.ControlCmd;
 import io.ula.commands.PermissionCmd;
 import io.ula.config.ConfigFile;
@@ -20,20 +19,16 @@ public final class drng extends JavaPlugin {
     public static ConfigFile PMS_CODES = new ConfigFile("permission_codes.json");
     public static ConfigFile DRNG_PERMISSIONS = new ConfigFile("permissions.json");
     public static ConfigFile PLAYER_TITLES = new ConfigFile("player_titles.json");
-    public static ConfigFile BANNED_PLAYERS = new ConfigFile("banned_players.json");
 
     @Override
     public void onEnable() {
         ControlCmd.plugin = this;
-        BanExtraCmd.plugin = this;
         //为命令类的plugin对象传值
         getServer().getPluginManager().registerEvents(new PlayerListener(this),this);
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS , commandsReloadableRegistrarEvent ->
             commandsReloadableRegistrarEvent.registrar().register(PermissionCmd.buildpms));
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS , commandsReloadableRegistrarEvent ->
                 commandsReloadableRegistrarEvent.registrar().register(ControlCmd.buildCCmd));
-        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS , commandsReloadableRegistrarEvent ->
-                commandsReloadableRegistrarEvent.registrar().register(BanExtraCmd.buildBanExtraCmd));
     }
 
     @Override
