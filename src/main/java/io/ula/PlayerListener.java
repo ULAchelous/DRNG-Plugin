@@ -2,6 +2,7 @@ package io.ula;
 
 import com.destroystokyo.paper.event.player.PlayerConnectionCloseEvent;
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import io.papermc.paper.ban.BanListType;
 import io.papermc.paper.event.player.AsyncChatEvent;
@@ -9,10 +10,10 @@ import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.object.ObjectContents;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
-import org.bukkit.Color;
 import org.bukkit.block.BlockFace;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Player;
@@ -33,8 +34,10 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.awt.*;
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import static io.ula.drng.*;
 
@@ -69,7 +72,7 @@ public class PlayerListener implements Listener {
 
             BukkitTask login_time_limited = Bukkit.getScheduler().runTaskLater(plugin, () ->{
                 for(Player pl : plugin.getServer().getOnlinePlayers())
-                    if(!pl.getScoreboardTags().contains("tester")) pl.kick(Component.text("长时间未输入内测码").color(TextColor.color(Color.RED.asRGB())));
+                    if(!pl.getScoreboardTags().contains("tester")) pl.kick(Component.text("长时间未输入内测码").color(TextColor.color(Color.RED.getRGB())));
             },600L);//超时踢出
             if(!player.getScoreboardTags().contains("tester")){
                 PotionEffect effect = new PotionEffect(
@@ -125,17 +128,12 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onEntityGetDamage(EntityDamageEvent event){
-        if (event.getEntity() instanceof Player){
-            ScoreBoardHelper.updateScores((Player) event.getEntity(),3);
-        }
-    }
-
-    @EventHandler
     public void onPlayerSendingMessages(AsyncChatEvent event){
             Player player = event.getPlayer();
             if(PLAYER_TITLES.has(player.getName())) {
-                Component message = getPlayerTitles(player)
+                Component message = Component.object(ObjectContents.playerHead(player.getUniqueId()))//添加玩家头像
+                        .append(Component.space())
+                        .append(getPlayerTitles(player))//添加头衔
                         .append(Component.text(String.format("<%s> ",player.getName())))
                         .append(event.message());
                 player.getWorld().sendMessage(message);
@@ -159,8 +157,8 @@ public class PlayerListener implements Listener {
             vectors.put(BlockFace.WEST,new Location(player.getWorld(),0.6,0,0));
             //存储被控制者移动方向（控制者朝向的反方向）
             if(player.isOnline()) {
-                event.getPlayer().sendActionBar(Component.text(String.format("你正在控制%s!", player.getName())).color(TextColor.color(Color.RED.asRGB())));
-                player.sendActionBar(Component.text(String.format("你正在被 %s 控制!", event.getPlayer().getName())).color(TextColor.color(Color.RED.asRGB())));
+                event.getPlayer().sendActionBar(Component.text(String.format("你正在控制%s!", player.getName())).color(TextColor.color(Color.RED.getRGB())));
+                player.sendActionBar(Component.text(String.format("你正在被 %s 控制!", event.getPlayer().getName())).color(TextColor.color(Color.RED.getRGB())));
                 player.teleport(event.getPlayer().getLocation());
                 player.teleport(player.getLocation().add(vectors.getOrDefault(event.getPlayer().getFacing(), new Location(player.getWorld(), 0, 0, 0))));
             }
@@ -172,9 +170,9 @@ public class PlayerListener implements Listener {
         if(event.getTickNumber() % 20 == 0){
             for(Player player : plugin.getServer().getOnlinePlayers()){
                 if(!player.getScoreboardTags().contains("tester")){
-                    player.showTitle(Title.title(Component.text("请输入 ").color(TextColor.color(Color.RED.asRGB()))
-                                    .append(Component.text("内测码").color(TextColor.color(Color.YELLOW.asRGB())))
-                                    .append(Component.text(" 来加入游戏").color(TextColor.color(Color.RED.asRGB())))
+                    player.showTitle(Title.title(Component.text("请输入 ").color(TextColor.color(Color.RED.getRGB()))
+                                    .append(Component.text("内测码").color(TextColor.color(Color.YELLOW.getRGB())))
+                                    .append(Component.text(" 来加入游戏").color(TextColor.color(Color.RED.getRGB())))
                             , Component.empty()));
                 }else if(player.getScoreboardTags().contains("invisibility_flag")){
                     player.removePotionEffect(PotionEffectType.INVISIBILITY);
@@ -202,14 +200,14 @@ public class PlayerListener implements Listener {
                             .append(Component.space())//spacer
                     ;
                 } catch (Exception e) {
-                    player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.asRGB())));
+                    player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.getRGB())));
                     LOGGER.error("Error in ./config/player_titles.json");
                     LOGGER.error("Not a valid Component object!");
                     return Component.text("");
                 }
             }
         } catch (ClassCastException e) {
-            player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.asRGB())));
+            player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.getRGB())));
             LOGGER.error("Error in ./config/player_titles.json");
             LOGGER.error(String.format("\"%s\" : ...<(HERE)", player.getName()));
             LOGGER.error("Wrong JsonElement,need JsonArray!");
