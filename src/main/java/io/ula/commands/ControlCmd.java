@@ -10,7 +10,6 @@ import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSele
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -18,6 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.awt.*;
 import java.util.UUID;
 
 public class ControlCmd {
@@ -28,33 +28,29 @@ public class ControlCmd {
                         Player player = (Player)commandContext.getSource().getSender();
                         PlayerSelectorArgumentResolver playerSelector = commandContext.getArgument("player", PlayerSelectorArgumentResolver.class);
                         if(player.hasMetadata("controlling_player")){
-                            player.sendMessage(Component.text("无法控制(未退出正在进行的控制)").color(TextColor.color(Color.RED.asRGB())));
+                            player.sendMessage(Component.text("无法控制(未退出正在进行的控制)").color(TextColor.color(Color.RED.getRGB())));
                             return 0;
                         }
                         Player playerobj = playerSelector.resolve(commandContext.getSource()).getFirst();
-                        if(playerobj != null) {
-                            if (playerobj.equals(player)) {
-                                player.sendMessage(Component.text("无法控制(对象为自身)").color(TextColor.color(Color.RED.asRGB())));
-                                return 0;
-                            }
-                            if (playerobj.isOp()) {
-                                player.sendMessage(Component.text("无法控制(对象为Operator)").color(TextColor.color(Color.RED.asRGB())));
-                                return 0;
-                            }
-                            player.addPotionEffect(new PotionEffect(
-                                    PotionEffectType.INVISIBILITY,
-                                    Integer.MAX_VALUE,
-                                    0,
-                                    false,
-                                    false
-                            ));
-                            playerobj.setMetadata("been_controlled", new FixedMetadataValue(plugin, player.getUniqueId()));//使用元数据标记被控制玩家，存储控制者
-                            player.setMetadata("controlling_player", new FixedMetadataValue(plugin, playerobj.getUniqueId()));//使用元数据标记控制玩家，存储被控制者
-                            player.setMetadata("location_before_control", new FixedMetadataValue(plugin, player.getLocation()));//存储控制者控制前的坐标
-                            player.teleport(playerobj.getLocation());
-                        }else {
-                            player.sendMessage(Component.text("未知的玩家").color(TextColor.color(java.awt.Color.RED.getRGB())));
+                        if (playerobj.equals(player)) {
+                            player.sendMessage(Component.text("无法控制(对象为自身)").color(TextColor.color(Color.RED.getRGB())));
+                            return 0;
                         }
+                        if (playerobj.isOp()) {
+                            player.sendMessage(Component.text("无法控制(对象为Operator)").color(TextColor.color(Color.RED.getRGB())));
+                            return 0;
+                        }
+                        player.addPotionEffect(new PotionEffect(
+                                PotionEffectType.INVISIBILITY,
+                                Integer.MAX_VALUE,
+                                0,
+                                false,
+                                false
+                        ));
+                        playerobj.setMetadata("been_controlled", new FixedMetadataValue(plugin, player.getUniqueId()));//使用元数据标记被控制玩家，存储控制者
+                        player.setMetadata("controlling_player", new FixedMetadataValue(plugin, playerobj.getUniqueId()));//使用元数据标记控制玩家，存储被控制者
+                        player.setMetadata("location_before_control", new FixedMetadataValue(plugin, player.getLocation()));//存储控制者控制前的坐标
+                        player.teleport(playerobj.getLocation());
                         return 0;
                     })
             )
@@ -69,7 +65,7 @@ public class ControlCmd {
 
                     player.removePotionEffect(PotionEffectType.INVISIBILITY);
                 }else{
-                    player.sendMessage(Component.text("没有正在进行的控制").color(TextColor.color(Color.RED.asRGB())));
+                    player.sendMessage(Component.text("没有正在进行的控制").color(TextColor.color(Color.RED.getRGB())));
                 }
                 return 0;
             }))

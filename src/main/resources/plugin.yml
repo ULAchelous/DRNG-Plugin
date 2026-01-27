@@ -1,5 +1,5 @@
 name: dr-next
-version: 'indev-v0.1'
+version: ' v1.0'
 main: io.ula.drng
 api-version: '1.21.11'
 authors: [ _Achelous ]

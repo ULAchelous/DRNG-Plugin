@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'io.ula'
-version = 'indev-v0.1'
+version = 'v1.0'
 
 repositories {
     mavenCentral()

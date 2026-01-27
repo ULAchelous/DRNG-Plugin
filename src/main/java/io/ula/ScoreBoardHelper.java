@@ -1,14 +1,16 @@
 package io.ula;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.object.ObjectContents;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.*;
 
+import javax.swing.text.AbstractDocument;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,10 +35,10 @@ public class ScoreBoardHelper {
                 .decorate(TextDecoration.ITALIC)
                 .decorate(TextDecoration.BOLD);
         Objective sidebar= scoreboard.registerNewObjective(player.getName(), Criteria.DUMMY, server_name);
-        Objective health_display = scoreboard.registerNewObjective("health",Criteria.HEALTH,Component.empty());
+        Objective health_display = scoreboard.registerNewObjective("health",Criteria.HEALTH,Component.text("health"),RenderType.HEARTS);
 
-        health_display.getScore("health").setScore(0);
-        sidebar.getScore("§e欢迎参加测试！").setScore(3);
+        health_display.setAutoUpdateDisplay(true);
+        sidebar.getScore("§e欢迎参加测试!").setScore(3);
         sidebar.getScore(String.format("死亡计数: §b§l%d",player.getMetadata("deathCount").getFirst().asInt())).setScore(2);
         sidebar.getScore(String.format("挖掘计数: §b§l%d",player.getMetadata("digCount").getFirst().asInt())).setScore(1);
 
@@ -63,12 +65,6 @@ public class ScoreBoardHelper {
                 player.getScoreboard().resetScores(String.format("挖掘计数: §b§l%d", player.getMetadata("digCountCache").getFirst().asInt()));
                 objective.getScore(String.format("挖掘计数: §b§l%d", player.getMetadata("digCount").getFirst().asInt())).setScore(1);
                 break;
-            case 3:
-                for(Objective obj : player.getScoreboard().getObjectives()){
-                    if(obj.getName().equals("health")){
-                        obj.getScore("health").setScore((int)player.getHealth());
-                    }
-                }
         }
     }
 }
