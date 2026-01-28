@@ -3,7 +3,7 @@ version: ' v1.1'
 main: io.ula.drng.Main
 api-version: '1.21.11'
 authors: [ _Achelous ]
-description: Desideraregio - Next基本插件
+description: Desideraregio - NextGen基本插件
 
 bootstrapper: io.ula.drng.DrngBootstrap
 
