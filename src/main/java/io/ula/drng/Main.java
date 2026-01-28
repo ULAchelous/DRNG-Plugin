@@ -1,11 +1,10 @@
-package io.ula;
+package io.ula.drng;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import io.ula.commands.ControlCmd;
-import io.ula.commands.PermissionCmd;
-import io.ula.config.ConfigFile;
+import io.ula.drng.commands.ControlCmd;
+import io.ula.drng.commands.PermissionCmd;
+import io.ula.drng.config.ConfigFile;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -19,7 +18,7 @@ import java.awt.*;
 import java.io.File;
 import java.util.Random;
 
-public final class drng extends JavaPlugin {
+public final class Main extends JavaPlugin {
     public static final String PLG_ID = "dr-next";
     public static final Logger LOGGER = LogManager.getLogger(PLG_ID);
     public static final File serverRoot = Bukkit.getServer().getWorldContainer();
@@ -28,6 +27,7 @@ public final class drng extends JavaPlugin {
     public static ConfigFile DRNG_PERMISSIONS = new ConfigFile("permissions.json");
     public static ConfigFile PLAYER_TITLES = new ConfigFile("player_titles.json");
     public static ConfigFile DRNG_TIPS = new ConfigFile("tips.json");
+    public static ConfigFile DRNG_NOTICES = new ConfigFile("notices.json");
 
     @Override
     public void onEnable() {
@@ -40,10 +40,6 @@ public final class drng extends JavaPlugin {
 
     private void registCommands(){
         this.getServer().getPluginManager().registerEvents(new PlayerListener(this),this);
-        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS , commandsReloadableRegistrarEvent ->
-                commandsReloadableRegistrarEvent.registrar().register(PermissionCmd.buildpms));
-        this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS , commandsReloadableRegistrarEvent ->
-                commandsReloadableRegistrarEvent.registrar().register(ControlCmd.buildCCmd));
     }
 
     private void startTasks(){

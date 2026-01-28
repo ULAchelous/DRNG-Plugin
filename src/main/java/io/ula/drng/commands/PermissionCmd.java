@@ -1,4 +1,4 @@
-package io.ula.commands;
+package io.ula.drng.commands;
 
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -10,17 +10,12 @@ import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerPortalEvent;
 
-import java.awt.*;
 import java.util.List;
-import java.util.Map;
 
-import static io.ula.drng.*;
+import static io.ula.drng.Main.*;
 
 public class PermissionCmd {
     public static final LiteralArgumentBuilder<CommandSourceStack> permission = Commands.literal("permission")

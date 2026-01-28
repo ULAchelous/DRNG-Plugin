@@ -1,6 +1,9 @@
 name: dr-next
 version: ' v1.0'
-main: io.ula.drng
+main: io.ula.drng.Main
 api-version: '1.21.11'
 authors: [ _Achelous ]
 description: Desideraregio - Next基本插件
+
+bootstrapper: io.ula.drng.DrngBootstrap
+

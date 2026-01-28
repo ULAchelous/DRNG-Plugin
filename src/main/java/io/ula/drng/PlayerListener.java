@@ -1,12 +1,12 @@
-package io.ula;
+package io.ula.drng;
 
-import com.destroystokyo.paper.event.player.PlayerConnectionCloseEvent;
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import io.papermc.paper.ban.BanListType;
+import io.papermc.paper.datacomponent.item.WrittenBookContent;
 import io.papermc.paper.event.player.AsyncChatEvent;
 
+import io.papermc.paper.event.player.PlayerCustomClickEvent;
+import net.kyori.adventure.dialog.DialogLike;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -15,16 +15,13 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
-import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -33,13 +30,11 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.awt.*;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
-import static io.ula.drng.*;
+import static io.ula.drng.Main.*;
 
 
 public class PlayerListener implements Listener {
@@ -52,23 +47,17 @@ public class PlayerListener implements Listener {
     }
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
-            Player player = event.getPlayer();
-            Component loginMsg = Component.text("");
-            if(PLAYER_TITLES.has(player.getName()))
-                loginMsg = loginMsg.append(getPlayerTitles(player));
-            loginMsg = loginMsg.append(Component.text(player.getName()))
-                    .append(Component.text("，欢迎回来～").decorate(TextDecoration.BOLD));
-            event.joinMessage(loginMsg);//欢迎消息
+        Player player = event.getPlayer();
+        Component loginMsg = Component.text("");
+        if(PLAYER_TITLES.has(player.getName()))
+            loginMsg = loginMsg.append(getPlayerTitles(player));
+        loginMsg = loginMsg.append(Component.text(player.getName()))
+                .append(Component.text("，欢迎回来～").decorate(TextDecoration.BOLD));
+        event.joinMessage(loginMsg);//欢迎消息
 
-            if(!player.hasMetadata("deathCount"))
-                player.setMetadata("deathCount", new FixedMetadataValue(plugin,0));
-            if(!player.hasMetadata("digCount"))
-                player.setMetadata("digCount", new FixedMetadataValue(plugin,0));
-            if(!player.hasMetadata("deathCountCache"))
-                player.setMetadata("deathCountCache", new FixedMetadataValue(plugin,0));
-            if(!player.hasMetadata("digCountCache"))
-                player.setMetadata("digCountCache", new FixedMetadataValue(plugin,0));
-            ScoreBoardHelper.createObjective(player);
+        initCounts(player);
+
+        ScoreBoardHelper.createObjective(player);
 
             BukkitTask login_time_limited = Bukkit.getScheduler().runTaskLater(plugin, () ->{
                 for(Player pl : plugin.getServer().getOnlinePlayers())
@@ -89,6 +78,17 @@ public class PlayerListener implements Listener {
             if(player.hasMetadata("been_controlled")){
                 player.removeMetadata("been_controlled", plugin);
             }
+    }
+
+    private void initCounts(Player player) {
+        if(!player.hasMetadata("deathCount"))
+            player.setMetadata("deathCount", new FixedMetadataValue(plugin,0));
+        if(!player.hasMetadata("digCount"))
+            player.setMetadata("digCount", new FixedMetadataValue(plugin,0));
+        if(!player.hasMetadata("deathCountCache"))
+            player.setMetadata("deathCountCache", new FixedMetadataValue(plugin,0));
+        if(!player.hasMetadata("digCountCache"))
+            player.setMetadata("digCountCache", new FixedMetadataValue(plugin,0));
     }
 
     @EventHandler
@@ -187,7 +187,8 @@ public class PlayerListener implements Listener {
         }
     }
 
-    private Component getPlayerTitles(Player player) {
+
+    public static Component getPlayerTitles(Player player) {
         PLAYER_TITLES.reload();
         Component component = Component.text("");
         try {
@@ -215,4 +216,5 @@ public class PlayerListener implements Listener {
         }
         return component;
     }
+
 }
