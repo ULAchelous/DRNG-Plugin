@@ -9,7 +9,6 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.action.DialogAction;
-import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import io.papermc.paper.registry.data.dialog.input.SingleOptionDialogInput;
 import io.papermc.paper.registry.data.dialog.input.TextDialogInput;
@@ -17,29 +16,23 @@ import io.papermc.paper.registry.data.dialog.type.DialogType;
 import io.papermc.paper.registry.event.RegistryEvents;
 import io.papermc.paper.registry.keys.DialogKeys;
 import io.ula.drng.commands.*;
-import io.ula.drng.config.ConfigFile;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickCallback;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.object.ObjectContents;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 import java.awt.*;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAmount;
-import java.util.Date;
 import java.util.List;
 
 import static io.ula.drng.Main.DRNG_NOTICES;
-import static io.ula.drng.Main.PLAYER_TITLES;
-import static io.ula.drng.PlayerListener.getPlayerTitles;
 
 public class DrngBootstrap implements PluginBootstrap {
     @Override
@@ -99,7 +92,12 @@ public class DrngBootstrap implements PluginBootstrap {
                                                                     DRNG_NOTICES.getKey("notices").getAsJsonArray().add(notice);
                                                                     DRNG_NOTICES.write();
                                                                 }
-                                                                Bukkit.getServer().sendMessage(Component.text("公告板上有新的信息！").color(TextColor.color(Color.yellow.getRGB())).decorate(TextDecoration.BOLD));
+                                                                Bukkit.getServer().sendMessage(Component.text("公告板上有新的信息！").color(TextColor.color(Color.yellow.getRGB())).decorate(TextDecoration.BOLD)
+                                                                        .hoverEvent(HoverEvent.showText(Component.text("点击以查看详情",TextColor.color(Color.cyan.getRGB()))))
+                                                                        .clickEvent(ClickEvent.callback(audience_ -> {
+                                                                            audience_.openBook(NoticeCmd.getNoticeBook());
+                                                                        }))
+                                                                );
                                                             }else{
                                                                 audience.sendMessage(Component.text("因为未同意许可，公告未发送").color(TextColor.color(Color.RED.getRGB())));
                                                             }

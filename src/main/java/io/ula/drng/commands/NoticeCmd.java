@@ -10,6 +10,7 @@ import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import io.ula.drng.PlayerListener;
 import net.kyori.adventure.dialog.DialogLike;
+import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -38,12 +39,7 @@ public class NoticeCmd {
             .then(Commands.literal("list")
                     .executes(commandContext -> {
                         Player player = (Player)commandContext.getSource().getSender();
-                        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
-                        book.editMeta(itemMeta ->{
-                        if(itemMeta instanceof BookMeta bookMeta)
-                            itemMeta = getNoticeBook(bookMeta);
-                        });
-                        player.openBook(book);
+                        player.openBook(getNoticeBook());
                         return 0;
                     }
             ))
@@ -57,7 +53,8 @@ public class NoticeCmd {
             )
             .requires(commandSourceStack -> (commandSourceStack.getSender() instanceof Player));
     public static LiteralCommandNode<CommandSourceStack> noticeCmd = noticeCmdBuilder.build();
-    private static BookMeta getNoticeBook(BookMeta bookMeta){
+    public static Book getNoticeBook(){
+        Book.Builder book = Book.book(Component.text("公告栏"),Component.text("Server")).toBuilder();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
                 .withZone(ZoneId.of("Asia/Shanghai"));
         if(DRNG_NOTICES.has("notices")) {
@@ -70,9 +67,7 @@ public class NoticeCmd {
                     DRNG_NOTICES.write();
                     continue;
                 }
-                bookMeta.setAuthor("希望之地 - NextGen");
-                bookMeta.setTitle("公告栏");
-                bookMeta.addPages(Component.empty()
+                book.addPage(Component.empty()
                         .append(Component.text("发布者:").color(TextColor.color(Color.YELLOW.getRGB())).decorate(TextDecoration.BOLD))
                         .append(Component.space())
                         .append(Component.text(author))
@@ -87,6 +82,6 @@ public class NoticeCmd {
                 );
             }
         }
-        return bookMeta;
+        return book.build();
     }
 }
