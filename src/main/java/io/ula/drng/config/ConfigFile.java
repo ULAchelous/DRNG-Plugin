@@ -1,4 +1,4 @@
-package io.ula.config;
+package io.ula.drng.config;
 
 import com.google.gson.*;
 import org.apache.logging.log4j.LogManager;
@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static io.ula.drng.PLG_ID;
-import static io.ula.drng.serverRoot;
+import static io.ula.drng.Main.PLG_ID;
+import static io.ula.drng.Main.serverRoot;
 
 public class ConfigFile {
     private final Logger LOGGER = LogManager.getLogger(PLG_ID);
