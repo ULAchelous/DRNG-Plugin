@@ -81,6 +81,7 @@ public class NoticeCmd {
                         .append(Component.newline())
                         .append(Component.text("发布时间：").color(TextColor.color(Color.CYAN.getRGB())))
                         .append(Component.text(notice.getAsJsonObject().get("created_time").getAsString()))
+                        .append(Component.newline())
                         .append(Component.text("截止时间：").color(TextColor.color(Color.green.getRGB())))
                         .append(Component.text(notice.getAsJsonObject().get("deadline").getAsString()))
                 );
