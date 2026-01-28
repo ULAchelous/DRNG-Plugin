@@ -93,6 +93,13 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event){
+        Player player = (Player)event.getPlayer();
+        Component quitMsg = Component.text("");
+        if(PLAYER_TITLES.has(player.getName()))
+            quitMsg = quitMsg.append(getPlayerTitles(player));
+        quitMsg = quitMsg.append(Component.text(player.getName()))
+                .append(Component.text("，再见～").decorate(TextDecoration.BOLD));
+        event.quitMessage(quitMsg);
         ScoreBoardHelper.removeObjective(event.getPlayer());
     }
 
@@ -130,15 +137,13 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerSendingMessages(AsyncChatEvent event){
             Player player = event.getPlayer();
-            if(PLAYER_TITLES.has(player.getName())) {
-                Component message = Component.object(ObjectContents.playerHead(player.getUniqueId()))//添加玩家头像
-                        .append(Component.space())
-                        .append(getPlayerTitles(player))//添加头衔
-                        .append(Component.text(String.format("<%s> ",player.getName())))
-                        .append(event.message());
-                player.getWorld().sendMessage(message);
-                event.setCancelled(true);
-            }
+            Component message = Component.object(ObjectContents.playerHead(player.getUniqueId()))
+                    .append(Component.space())
+                    .append(getPlayerTitles(player))//添加头衔
+                    .append(Component.text(String.format("<%s> ",player.getName())))
+                    .append(event.message());
+            player.getWorld().sendMessage(message);
+            event.setCancelled(true);
     }
 
     @EventHandler
@@ -190,29 +195,31 @@ public class PlayerListener implements Listener {
 
     public static Component getPlayerTitles(Player player) {
         PLAYER_TITLES.reload();
-        Component component = Component.text("");
-        try {
-            for (JsonElement title : PLAYER_TITLES.getKey(player.getName()).getAsJsonArray()) {
-                try {
-                    component = component
-                            .append(Component.text("["))
-                            .append(GsonComponentSerializer.gson().deserialize(title.toString()))//title component
-                            .append(Component.text("]"))
-                            .append(Component.space())//spacer
-                    ;
-                } catch (Exception e) {
-                    player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.getRGB())));
-                    LOGGER.error("Error in ./config/player_titles.json");
-                    LOGGER.error("Not a valid Component object!");
-                    return Component.text("");
+        Component component = Component.empty();
+        if(PLAYER_TITLES.has(player.getName())) {
+            try {
+                for (JsonElement title : PLAYER_TITLES.getKey(player.getName()).getAsJsonArray()) {
+                    try {
+                        component = component
+                                .append(Component.text("["))
+                                .append(GsonComponentSerializer.gson().deserialize(title.toString()))//title component
+                                .append(Component.text("]"))
+                                .append(Component.space())//spacer
+                        ;
+                    } catch (Exception e) {
+                        player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.getRGB())));
+                        LOGGER.error("Error in ./config/player_titles.json");
+                        LOGGER.error("Not a valid Component object!");
+                        return Component.text("");
+                    }
                 }
+            } catch (ClassCastException e) {
+                player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.getRGB())));
+                LOGGER.error("Error in ./config/player_titles.json");
+                LOGGER.error(String.format("\"%s\" : ...<(HERE)", player.getName()));
+                LOGGER.error("Wrong JsonElement,need JsonArray!");
+                return Component.text("");
             }
-        } catch (ClassCastException e) {
-            player.sendMessage(Component.text("错误: 玩家头衔加载中出现问题").color(TextColor.color(Color.RED.getRGB())));
-            LOGGER.error("Error in ./config/player_titles.json");
-            LOGGER.error(String.format("\"%s\" : ...<(HERE)", player.getName()));
-            LOGGER.error("Wrong JsonElement,need JsonArray!");
-            return Component.text("");
         }
         return component;
     }
