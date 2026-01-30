@@ -134,6 +134,7 @@ public class PlayerListener implements Listener {
         ScoreBoardHelper.updateScores(player,1);
     }
 
+
     @EventHandler
     public void onPlayerSendingMessages(AsyncChatEvent event){
             Player player = event.getPlayer();
