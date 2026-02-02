@@ -33,9 +33,14 @@ public class ScoreBoardHelper {
         Objective health_display = scoreboard.registerNewObjective("health",Criteria.HEALTH,Component.text("health"),RenderType.HEARTS);
 
         health_display.setAutoUpdateDisplay(true);
-        sidebar.getScore("§e欢迎参加测试!").setScore(3);
-        sidebar.getScore(String.format("死亡计数: §b§l%d",player.getMetadata("deathCount").getFirst().asInt())).setScore(2);
-        sidebar.getScore(String.format("挖掘计数: §b§l%d",player.getMetadata("digCount").getFirst().asInt())).setScore(1);
+        sidebar.getScore("§e欢迎参加测试!").setScore(8);
+        sidebar.getScore("在线时长: " + getOnlineTime(player.getMetadata("onlineTime").getFirst().asInt())).setScore(7);
+        sidebar.getScore(String.format("死亡计数: §b§l%d",player.getMetadata("deathCount").getFirst().asInt())).setScore(6);
+        sidebar.getScore(String.format("挖掘计数: §b§l%d",player.getMetadata("digCount").getFirst().asInt())).setScore(5);
+        sidebar.getScore(String.format("使用 §e§l/notice")).setScore(4);
+        sidebar.getScore("来发布和查看公告").setScore(3);
+        sidebar.getScore(String.format("使用 §e§l/pms")).setScore(2);
+        sidebar.getScore(" 来申请权限").setScore(1);
 
         sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
         health_display.setDisplaySlot(DisplaySlot.PLAYER_LIST);
@@ -43,9 +48,14 @@ public class ScoreBoardHelper {
         objectives.put(player.getUniqueId(),sidebar);
     }
 
-    public static void removeObjective(Player player){
+    public static void removeObjective(Player player) {
         objectives.remove(player.getUniqueId());
         player.setScoreboard(scoreboardManager.getMainScoreboard());
+    }
+    private static String getOnlineTime(int time){
+        int hour = time / 60;
+        int minute = time % 60;
+        return String.format("§e%d§r小时§e%d§r分钟",hour,minute);
     }
 
     public static void updateScores(Player player,int type) {
@@ -54,11 +64,15 @@ public class ScoreBoardHelper {
         switch(type) {
             case 1:
                 player.getScoreboard().resetScores(String.format("死亡计数: §b§l%d", player.getMetadata("deathCountCache").getFirst().asInt()));
-                objective.getScore(String.format("死亡计数: §b§l%d", player.getMetadata("deathCount").getFirst().asInt())).setScore(2);
+                objective.getScore(String.format("死亡计数: §b§l%d", player.getMetadata("deathCount").getFirst().asInt())).setScore(6);
                 break;
             case 2:
                 player.getScoreboard().resetScores(String.format("挖掘计数: §b§l%d", player.getMetadata("digCountCache").getFirst().asInt()));
-                objective.getScore(String.format("挖掘计数: §b§l%d", player.getMetadata("digCount").getFirst().asInt())).setScore(1);
+                objective.getScore(String.format("挖掘计数: §b§l%d", player.getMetadata("digCount").getFirst().asInt())).setScore(5);
+                break;
+            case 3:
+                player.getScoreboard().resetScores("在线时长: " + getOnlineTime(player.getMetadata("onlineTimeCache").getFirst().asInt()));
+                objective.getScore("在线时长: " + getOnlineTime(player.getMetadata("onlineTime").getFirst().asInt())).setScore(7);
                 break;
         }
     }

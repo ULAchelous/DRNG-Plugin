@@ -55,7 +55,7 @@ public class PlayerListener implements Listener {
                 .append(Component.text("，欢迎回来～").decorate(TextDecoration.BOLD));
         event.joinMessage(loginMsg);//欢迎消息
 
-        initCounts(player);
+        initMetadata(player);
 
         ScoreBoardHelper.createObjective(player);
 
@@ -80,7 +80,9 @@ public class PlayerListener implements Listener {
             }
     }
 
-    private void initCounts(Player player) {
+    private void initMetadata(Player player) {
+        player.setMetadata("onlineTime",new FixedMetadataValue(plugin,0));
+        player.setMetadata("onlineTimeCache",new FixedMetadataValue(plugin,0));
         if(!player.hasMetadata("deathCount"))
             player.setMetadata("deathCount", new FixedMetadataValue(plugin,0));
         if(!player.hasMetadata("digCount"))
@@ -94,6 +96,8 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event){
         Player player = (Player)event.getPlayer();
+        player.removeMetadata("onlineTime",plugin);
+        player.removeMetadata("onlineTimeCache",plugin);
         Component quitMsg = Component.text("");
         if(PLAYER_TITLES.has(player.getName()))
             quitMsg = quitMsg.append(getPlayerTitles(player));

@@ -15,6 +15,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
@@ -60,7 +62,7 @@ public final class Main extends JavaPlugin {
                     .append(Component.text("]:"))
             );
             getServer().sendMessage(Component.text(tips.get(new Random().nextInt(tips.size())).getAsString()));
-        },0,1800*20);//定时发送提示
+        },1800*20,1800*20);//定时发送提示
         scheduler.runTaskTimer(this,() ->{
             int owCnt=0,netherCnt=0,teCnt=0;
             World overworld = Bukkit.getWorld(Key.key("overworld"));
@@ -101,7 +103,17 @@ public final class Main extends JavaPlugin {
                     .append(Component.text("末地："))
                     .append(Component.text(teCnt,TextColor.color(Color.YELLOW.getRGB())).decorate(TextDecoration.BOLD))
             );
-        },1200*20,1200*20);
+        },1200*20,1200*20);//扫地机器人
+        scheduler.runTaskTimer(this,() -> {
+            for(Player player : getServer().getOnlinePlayers()) {
+                if (player.hasMetadata("onlineTime")) {
+                    int value = player.getMetadata("onlineTime").getFirst().asInt();
+                    player.setMetadata("onlineTimeCache", new FixedMetadataValue(this, value));
+                    player.setMetadata("onlineTime", new FixedMetadataValue(this, value + 1));
+                    ScoreBoardHelper.updateScores(player,3);
+                }
+            }
+        },20*60,20*60);
     }
 
     @Override

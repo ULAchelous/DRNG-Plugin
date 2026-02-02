@@ -54,16 +54,19 @@ public class NoticeCmd {
             .requires(commandSourceStack -> (commandSourceStack.getSender() instanceof Player));
     public static LiteralCommandNode<CommandSourceStack> noticeCmd = noticeCmdBuilder.build();
     public static Book getNoticeBook(){
+        DRNG_NOTICES.reload();
         Book.Builder book = Book.book(Component.text("公告栏"),Component.text("Server")).toBuilder();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
                 .withZone(ZoneId.of("Asia/Shanghai"));
         if(DRNG_NOTICES.has("notices")) {
-            for (JsonElement notice : DRNG_NOTICES.getKey("notices").getAsJsonArray()) {
+            for (int i=0;i<DRNG_NOTICES.getKey("notices").getAsJsonArray().size();i++) {
+                JsonElement notice = DRNG_NOTICES.getKey("notices").getAsJsonArray().get(i);
                 String author = notice.getAsJsonObject().get("author").getAsString();
                 String content = notice.getAsJsonObject().get("content").getAsString();
                 String deadline = notice.getAsJsonObject().get("deadline").getAsString();
                 if (LocalDate.now(ZoneId.of("Asia/Shanghai")).isAfter(LocalDate.parse(deadline,formatter))){
-                    notice.getAsJsonArray().remove(notice);
+                    notice.getAsJsonObject().addProperty("removed",true);
+                    DRNG_NOTICES.getKey("notices").getAsJsonArray().set(i,notice);
                     DRNG_NOTICES.write();
                     continue;
                 }
@@ -80,6 +83,14 @@ public class NoticeCmd {
                         .append(Component.text("截止时间：").color(TextColor.color(Color.green.getRGB())))
                         .append(Component.text(notice.getAsJsonObject().get("deadline").getAsString()))
                 );
+            }
+            for(int i=0;i<DRNG_NOTICES.getKey("notices").getAsJsonArray().size();i++){
+                JsonElement notice = DRNG_NOTICES.getKey("notices").getAsJsonArray().get(i);
+                if(notice.getAsJsonObject().has("removed")) {
+                    DRNG_NOTICES.getKey("notices").getAsJsonArray().remove(i);
+                    DRNG_NOTICES.write();
+                    i=0;
+                }
             }
         }
         return book.build();

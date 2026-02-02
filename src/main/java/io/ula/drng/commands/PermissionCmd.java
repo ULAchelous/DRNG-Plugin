@@ -18,7 +18,7 @@ import java.util.List;
 import static io.ula.drng.Main.*;
 
 public class PermissionCmd {
-    public static final LiteralArgumentBuilder<CommandSourceStack> permission = Commands.literal("permission")
+    public static final LiteralArgumentBuilder<CommandSourceStack> permission = Commands.literal("pms")
 
             .then(Commands.literal("request")
                     .then(Commands.argument("permissions",StringArgumentType.string())
