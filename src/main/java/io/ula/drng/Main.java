@@ -99,7 +99,7 @@ public final class Main extends JavaPlugin {
                     .append(Component.text(netherCnt,TextColor.color(Color.YELLOW.getRGB())).decorate(TextDecoration.BOLD))
                     .append(Component.space())
                     .append(Component.text("末地："))
-                    .append(Component.text(owCnt,TextColor.color(Color.YELLOW.getRGB())).decorate(TextDecoration.BOLD))
+                    .append(Component.text(teCnt,TextColor.color(Color.YELLOW.getRGB())).decorate(TextDecoration.BOLD))
             );
         },1200*20,1200*20);
     }
