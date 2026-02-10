@@ -1,12 +1,12 @@
 package io.ula.drng;
 
+import com.destroystokyo.paper.event.brigadier.AsyncPlayerSendCommandsEvent;
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import io.papermc.paper.datacomponent.item.WrittenBookContent;
+import com.google.gson.JsonObject;
 import io.papermc.paper.event.player.AsyncChatEvent;
 
-import io.papermc.paper.event.player.PlayerCustomClickEvent;
-import net.kyori.adventure.dialog.DialogLike;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -21,9 +21,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -31,6 +29,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.awt.Color;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -172,6 +172,26 @@ public class PlayerListener implements Listener {
                 player.teleport(event.getPlayer().getLocation());
                 player.teleport(player.getLocation().add(vectors.getOrDefault(event.getPlayer().getFacing(), new Location(player.getWorld(), 0, 0, 0))));
             }
+        }
+    }
+    @EventHandler
+    public void onPlayerExecute(PlayerCommandPreprocessEvent event){
+        COMMANDS_TO_LOG.reload();
+        Boolean flag = false;
+        Player sender = event.getPlayer();
+        String[] arguments = event.getMessage().split(" ");
+        if(!COMMAND_EXECUTE.has(sender.getName()))
+            COMMAND_EXECUTE.addKey(sender.getName(),new JsonArray());
+        for(JsonElement element : COMMANDS_TO_LOG.getKey("commands").getAsJsonArray())
+            if(arguments[0].equals("/"+element.getAsString()))
+                flag = true;
+        if(flag) {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+            JsonObject log = new JsonObject();
+            log.addProperty("command", event.getMessage());
+            log.addProperty("time", formatter.format(LocalDateTime.now()));
+            COMMAND_EXECUTE.getKey(sender.getName()).getAsJsonArray().add(log);
+            COMMAND_EXECUTE.write();
         }
     }
 

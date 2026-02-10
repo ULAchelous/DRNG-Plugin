@@ -37,6 +37,8 @@ public final class Main extends JavaPlugin {
     public static ConfigFile PLAYER_TITLES = new ConfigFile("player_titles.json");
     public static ConfigFile DRNG_TIPS = new ConfigFile("tips.json");
     public static ConfigFile DRNG_NOTICES = new ConfigFile("notices.json");
+    public static ConfigFile COMMAND_EXECUTE = new ConfigFile("cmd_exe.json");
+    public static ConfigFile COMMANDS_TO_LOG = new ConfigFile("log_cmd.json");
 
     @Override
     public void onEnable() {
@@ -105,15 +107,17 @@ public final class Main extends JavaPlugin {
             );
         },1200*20,1200*20);//扫地机器人
         scheduler.runTaskTimer(this,() -> {
-            for(Player player : getServer().getOnlinePlayers()) {
-                if (player.hasMetadata("onlineTime")) {
-                    int value = player.getMetadata("onlineTime").getFirst().asInt();
-                    player.setMetadata("onlineTimeCache", new FixedMetadataValue(this, value));
-                    player.setMetadata("onlineTime", new FixedMetadataValue(this, value + 1));
-                    ScoreBoardHelper.updateScores(player,3);
+            if(getServer().getOnlinePlayers().size() >= 3000) {
+                for (Player player : getServer().getOnlinePlayers()) {
+                    if (player.hasMetadata("onlineTime")) {
+                        int value = player.getMetadata("onlineTime").getFirst().asInt();
+                        player.setMetadata("onlineTimeCache", new FixedMetadataValue(this, value));
+                        player.setMetadata("onlineTime", new FixedMetadataValue(this, value + 1));
+                        ScoreBoardHelper.updateScores(player, 3);
+                    }
                 }
             }
-        },20*60,20*60);
+        },20,20);
     }
 
     @Override
