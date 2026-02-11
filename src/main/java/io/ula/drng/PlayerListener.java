@@ -233,8 +233,10 @@ public class PlayerListener implements Listener {
     public void onPlayerAttack(PrePlayerAttackEntityEvent event){
         Entity target = event.getAttacked();
         Player player = event.getPlayer();
-        if(player.getPassengers().contains(target))
+        if(player.getPassengers().contains(target)) {
             player.removePassenger(target);
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
