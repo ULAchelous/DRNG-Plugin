@@ -1,5 +1,5 @@
 name: dr-ng
-version: ' v1.2'
+version: ' v1.3'
 main: io.ula.drng.Main
 api-version: '1.21.11'
 authors: [ _Achelous ]

@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.papermc.paper.event.player.AsyncChatEvent;
 
+import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -226,6 +227,14 @@ public class PlayerListener implements Listener {
                 firework.setFireworkMeta(meta);
             });
         }
+    }
+
+    @EventHandler
+    public void onPlayerAttack(PrePlayerAttackEntityEvent event){
+        Entity target = event.getAttacked();
+        Player player = event.getPlayer();
+        if(player.getPassengers().contains(target))
+            player.removePassenger(target);
     }
 
     @EventHandler
