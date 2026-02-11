@@ -14,14 +14,23 @@ import net.kyori.adventure.text.object.ObjectContents;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Player;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.meta.FireworkEffectMeta;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -31,7 +40,9 @@ import org.bukkit.scheduler.BukkitTask;
 import java.awt.Color;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.ula.drng.Main.*;
@@ -39,7 +50,6 @@ import static io.ula.drng.Main.*;
 
 public class PlayerListener implements Listener {
     private final JavaPlugin plugin;
-
 
 
     public PlayerListener(JavaPlugin plugin) {
@@ -96,6 +106,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event){
         Player player = (Player)event.getPlayer();
+
         player.removeMetadata("onlineTime",plugin);
         player.removeMetadata("onlineTimeCache",plugin);
         Component quitMsg = Component.text("");
@@ -153,24 +164,25 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event){
+        Player player = event.getPlayer();
         if(event.getPlayer().hasMetadata("been_controlled")){
             event.setCancelled(true);//通过玩家的元数据检测玩家是否被控制
         }
         if(event.getPlayer().hasMetadata("controlling_player")){
             java.util.UUID UUID = (java.util.UUID)event.getPlayer().getMetadata("controlling_player").getFirst().value();
-            Player player = Bukkit.getPlayer(UUID);
+            Player target = Bukkit.getPlayer(UUID);
 
             Map<BlockFace,Location> vectors = new HashMap<>();
-            vectors.put(BlockFace.NORTH,new Location(player.getWorld(),0,0,0.6));
-            vectors.put(BlockFace.SOUTH,new Location(player.getWorld(),0,0,-0.6));
-            vectors.put(BlockFace.EAST,new Location(player.getWorld(),-0.6,0,0));
-            vectors.put(BlockFace.WEST,new Location(player.getWorld(),0.6,0,0));
+            vectors.put(BlockFace.NORTH,new Location(target.getWorld(),0,0,0.6));
+            vectors.put(BlockFace.SOUTH,new Location(target.getWorld(),0,0,-0.6));
+            vectors.put(BlockFace.EAST,new Location(target.getWorld(),-0.6,0,0));
+            vectors.put(BlockFace.WEST,new Location(target.getWorld(),0.6,0,0));
             //存储被控制者移动方向（控制者朝向的反方向）
-            if(player.isOnline()) {
-                event.getPlayer().sendActionBar(Component.text(String.format("你正在控制%s!", player.getName())).color(TextColor.color(Color.RED.getRGB())));
-                player.sendActionBar(Component.text(String.format("你正在被 %s 控制!", event.getPlayer().getName())).color(TextColor.color(Color.RED.getRGB())));
-                player.teleport(event.getPlayer().getLocation());
-                player.teleport(player.getLocation().add(vectors.getOrDefault(event.getPlayer().getFacing(), new Location(player.getWorld(), 0, 0, 0))));
+            if(target.isOnline()) {
+                player.sendActionBar(Component.text(String.format("你正在控制%s!", target.getName())).color(TextColor.color(Color.RED.getRGB())));
+                target.sendActionBar(Component.text(String.format("你正在被 %s 控制!", player.getName())).color(TextColor.color(Color.RED.getRGB())));
+                target.teleport(player.getLocation());
+                target.teleport(target.getLocation().add(vectors.getOrDefault(player.getFacing(), new Location(target.getWorld(), 0, 0, 0))));
             }
         }
     }
@@ -192,6 +204,27 @@ public class PlayerListener implements Listener {
             log.addProperty("time", formatter.format(LocalDateTime.now()));
             COMMAND_EXECUTE.getKey(sender.getName()).getAsJsonArray().add(log);
             COMMAND_EXECUTE.write();
+        }
+    }
+    @EventHandler
+    public  void onPlayerInteractEntity(PlayerInteractEntityEvent event){
+        if (event.getRightClicked() instanceof  Player && event.getHand() == EquipmentSlot.HAND)
+            event.getRightClicked().addPassenger(event.getPlayer());
+    }
+    @EventHandler
+    public void onEntityExplode(EntityExplodeEvent event){
+        Entity entity = event.getEntity();
+        if (event.getEntityType() == EntityType.CREEPER){
+            event.blockList().clear();
+            event.getEntity().getWorld().spawn(entity.getLocation(), Firework.class,firework -> {
+                FireworkEffect fireworkEffect = FireworkEffect.builder()
+                        .with(FireworkEffect.Type.CREEPER)
+                        .withColor(org.bukkit.Color.GREEN)
+                        .build();
+                FireworkMeta meta = firework.getFireworkMeta();
+                meta.addEffect(fireworkEffect);
+                firework.setFireworkMeta(meta);
+            });
         }
     }
 

@@ -23,11 +23,12 @@ public class TpaCmd {
             .then(Commands.argument("target",ArgumentTypes.player()).executes(context -> {
                 Player sendr = (Player) context.getSource().getSender();
                 Player target = context.getArgument("target", PlayerSelectorArgumentResolver.class).resolve(context.getSource()).getFirst();
+                sendr.sendMessage(Component.text("请耐心等待对方接受传送哦~"));
                 target.sendMessage(Component.text("玩家")
                         .append(Component.space())
                         .append(Component.text(sendr.getName(), TextColor.color(Color.YELLOW.getRGB()), TextDecoration.BOLD))
                         .append(Component.space())
-                        .append(Component.text("请求传送到您的位置"))
+                        .append(Component.text("想要传送到你这里！"))
                 );
                 target.sendMessage(Component.empty()
                         .append(Component.text("[同意]")
@@ -38,7 +39,7 @@ public class TpaCmd {
                         .append(Component.text("[拒绝]")
                                 .append(Component.object(ObjectContents.sprite(Key.key("gui"),Key.key("pending_invite/reject"))))
                                 .hoverEvent(HoverEvent.showText(Component.text("点击拒绝传送",TextColor.color(Color.RED.getRGB()))))
-                                .clickEvent(ClickEvent.callback(audience -> sendr.sendMessage(Component.text("对方拒绝了您的请求",TextColor.color(Color.RED.getRGB()))))))
+                                .clickEvent(ClickEvent.callback(audience -> sendr.sendMessage(Component.text("你被拒绝了！" ,TextColor.color(Color.RED.getRGB()))))))
                 );
                 return 0;
             }))
