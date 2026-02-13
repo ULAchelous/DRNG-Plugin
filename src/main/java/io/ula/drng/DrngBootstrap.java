@@ -32,7 +32,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static io.ula.drng.Main.DRNG_NOTICES;
+import static io.ula.drng.config.Configs.*;
 
 public class DrngBootstrap implements PluginBootstrap {
     @Override
@@ -42,6 +42,7 @@ public class DrngBootstrap implements PluginBootstrap {
             commands.registrar().register(ControlCmd.buildCCmd);
             commands.registrar().register(NoticeCmd.noticeCmd);
             commands.registrar().register(TpaCmd.tpaCmd);
+            commands.registrar().register(HomeCmd.homeCmd);
         });//注册命令
 
         context.getLifecycleManager().registerEventHandler(RegistryEvents.DIALOG.compose()

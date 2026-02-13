@@ -15,7 +15,8 @@ import org.bukkit.entity.Player;
 
 import java.util.List;
 
-import static io.ula.drng.Main.*;
+import static io.ula.drng.Main.LOGGER;
+import static io.ula.drng.config.Configs.*;
 
 public class PermissionCmd {
     public static final LiteralArgumentBuilder<CommandSourceStack> permission = Commands.literal("pms")

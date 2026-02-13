@@ -1,9 +1,8 @@
 package io.ula.drng;
 
-import com.destroystokyo.paper.profile.PlayerProfile;
 import com.google.gson.JsonArray;
 import io.ula.drng.commands.ControlCmd;
-import io.ula.drng.config.ConfigFile;
+import static io.ula.drng.config.Configs.*;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -16,17 +15,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.io.File;
 import java.util.Random;
-import java.util.UUID;
 
 
 public final class Main extends JavaPlugin {
@@ -34,13 +30,8 @@ public final class Main extends JavaPlugin {
     public static final Logger LOGGER = LogManager.getLogger(PLG_ID);
     public static final File serverRoot = Bukkit.getServer().getWorldContainer();
 
-    public static ConfigFile PMS_CODES = new ConfigFile("permission_codes.json");
-    public static ConfigFile DRNG_PERMISSIONS = new ConfigFile("permissions.json");
-    public static ConfigFile PLAYER_TITLES = new ConfigFile("player_titles.json");
-    public static ConfigFile DRNG_TIPS = new ConfigFile("tips.json");
-    public static ConfigFile DRNG_NOTICES = new ConfigFile("notices.json");
-    public static ConfigFile COMMAND_EXECUTE = new ConfigFile("cmd_exe.json");
-    public static ConfigFile COMMANDS_TO_LOG = new ConfigFile("log_cmd.json");
+
+
 
     @Override
     public void onEnable() {

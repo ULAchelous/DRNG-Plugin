@@ -46,7 +46,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.ula.drng.Main.*;
+import static io.ula.drng.Main.LOGGER;
+import static io.ula.drng.config.Configs.*;
 
 
 public class PlayerListener implements Listener {

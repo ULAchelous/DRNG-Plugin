@@ -39,8 +39,10 @@ public class ScoreBoardHelper {
         sidebar.getScore(String.format("挖掘计数: §b§l%d",player.getMetadata("digCount").getFirst().asInt())).setScore(5);
         sidebar.getScore(String.format("使用 §e§l/notice")).setScore(4);
         sidebar.getScore("来发布和查看公告").setScore(3);
-        sidebar.getScore(String.format("使用 §e§l/pms")).setScore(2);
-        sidebar.getScore(" 来申请权限").setScore(1);
+        sidebar.getScore(String.format("使用 §e§l/home")).setScore(2);
+        sidebar.getScore(" 来设置传送点").setScore(1);
+        sidebar.getScore(String.format("使用 §e§l/tpa")).setScore(2);
+        sidebar.getScore(" 来传送到玩家").setScore(1);
 
         sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
         health_display.setDisplaySlot(DisplaySlot.PLAYER_LIST);

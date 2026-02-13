@@ -8,6 +8,7 @@ import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickCallback;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.event.HoverEventSource;
@@ -17,6 +18,7 @@ import net.kyori.adventure.text.object.ObjectContents;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
+import java.time.Duration;
 
 public class TpaCmd {
     private static LiteralArgumentBuilder<CommandSourceStack> tpaCmdBuilder = Commands.literal("tpa")
@@ -34,12 +36,14 @@ public class TpaCmd {
                         .append(Component.text("[同意]")
                                 .append(Component.object(ObjectContents.sprite(Key.key("gui"),Key.key("pending_invite/accept"))))
                                 .hoverEvent(HoverEvent.showText(Component.text("点击确认传送",TextColor.color(Color.green.getRGB()))))
-                                .clickEvent(ClickEvent.callback(audience -> sendr.teleport(target))))
+                                .clickEvent(ClickEvent.callback(audience -> sendr.teleport(target)
+                                , ClickCallback.Options.builder().lifetime(Duration.ofSeconds(10)).build())))
                         .append(Component.space())
                         .append(Component.text("[拒绝]")
                                 .append(Component.object(ObjectContents.sprite(Key.key("gui"),Key.key("pending_invite/reject"))))
                                 .hoverEvent(HoverEvent.showText(Component.text("点击拒绝传送",TextColor.color(Color.RED.getRGB()))))
-                                .clickEvent(ClickEvent.callback(audience -> sendr.sendMessage(Component.text("你被拒绝了！" ,TextColor.color(Color.RED.getRGB()))))))
+                                .clickEvent(ClickEvent.callback(audience -> sendr.sendMessage(Component.text("你被拒绝了！" ,TextColor.color(Color.RED.getRGB())))
+                                ,ClickCallback.Options.builder().lifetime(Duration.ofSeconds(10)).build())))
                 );
                 return 0;
             }))

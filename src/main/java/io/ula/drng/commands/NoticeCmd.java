@@ -23,16 +23,11 @@ import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 
 import java.awt.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 
-import static io.ula.drng.Main.DRNG_NOTICES;
-import static io.ula.drng.Main.LOGGER;
-import static io.ula.drng.PlayerListener.getPlayerTitles;
+import static io.ula.drng.config.Configs.*;
 
 public class NoticeCmd {
     static LiteralArgumentBuilder<CommandSourceStack> noticeCmdBuilder = Commands.literal("notice")
