@@ -30,9 +30,6 @@ public final class Main extends JavaPlugin {
     public static final Logger LOGGER = LogManager.getLogger(PLG_ID);
     public static final File serverRoot = Bukkit.getServer().getWorldContainer();
 
-
-
-
     @Override
     public void onEnable() {
         ControlCmd.plugin = this;

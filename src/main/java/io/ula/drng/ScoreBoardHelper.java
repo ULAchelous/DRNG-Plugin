@@ -34,15 +34,14 @@ public class ScoreBoardHelper {
         Objective health_display = scoreboard.registerNewObjective("health",Criteria.HEALTH,Component.text("health"),RenderType.HEARTS);
 
         health_display.setAutoUpdateDisplay(true);
-        sidebar.getScore("§e欢迎参加测试!").setScore(10);
         sidebar.getScore("在线时长: " + getOnlineTime(player.getMetadata("onlineTime").getFirst().asInt())).setScore(9);
         sidebar.getScore(String.format("死亡计数: §b§l%d",player.getMetadata("deathCount").getFirst().asInt())).setScore(8);
         sidebar.getScore(String.format("挖掘计数: §b§l%d",player.getMetadata("digCount").getFirst().asInt())).setScore(7);
-        sidebar.getScore(String.format("使用 §e§l/notice")).setScore(6);
+        sidebar.getScore("使用 §e§l/notice").setScore(6);
         sidebar.getScore("来发布和查看公告").setScore(5);
-        sidebar.getScore(String.format("使用 §e§l/home")).setScore(4);
+        sidebar.getScore("使用 §e§l/home").setScore(4);
         sidebar.getScore(" 来设置传送点").setScore(3);
-        sidebar.getScore(String.format("使用 §e§l/tpa")).setScore(2);
+        sidebar.getScore("使用 §e§l/tpa").setScore(2);
         sidebar.getScore(" 来传送到玩家").setScore(1);
         sidebar.numberFormat(NumberFormat.blank());
         sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);

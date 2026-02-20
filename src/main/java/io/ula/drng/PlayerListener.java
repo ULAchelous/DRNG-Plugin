@@ -1,6 +1,5 @@
 package io.ula.drng;
 
-import com.destroystokyo.paper.event.brigadier.AsyncPlayerSendCommandsEvent;
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -13,37 +12,27 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.object.ObjectContents;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.title.Title;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.damage.DamageSource;
-import org.bukkit.damage.DamageType;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitTask;
 
+import java.awt.*;
 import java.awt.Color;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static io.ula.drng.Main.LOGGER;
@@ -139,8 +128,8 @@ public class PlayerListener implements Listener {
                     .append(Component.space())
                     .append(getPlayerTitles(player))//添加头衔
                     .append(Component.text(String.format("<%s> ",player.getName())))
-                    .append(event.message());
-            player.getWorld().sendMessage(message);
+                    .append(Component.text(getPlayerChatMsg(LegacyComponentSerializer.legacyAmpersand().serialize(event.message()), player)));
+            player.getServer().sendMessage(message);
             event.setCancelled(true);
     }
 
@@ -265,4 +254,33 @@ public class PlayerListener implements Listener {
         return component;
     }
 
+    public static String getPlayerChatMsg(String message,Player player){
+        CHAT_REPLACEMENTS.reload();
+        JsonArray array = CHAT_REPLACEMENTS.getKey(player.getName()).getAsJsonArray();
+        for (int i=0;i<array.size();i++){
+            JsonElement element = array.get(i);
+            if (element.getAsJsonObject().has("removed")){
+                CHAT_REPLACEMENTS.getKey(player.getName()).getAsJsonArray().remove(element);
+                continue;
+            }
+            message+="☐";
+            String key = element.getAsJsonObject().get("key").getAsString();
+            String replace = element.getAsJsonObject().get("replace").getAsString();
+            String[] temp = message.split(key);
+            message="";
+            int len = temp.length;
+            if(temp[len -1].equals("☐")){
+                for(int idx = 0; idx < len-1; idx++) message += temp[idx] + replace;
+            }else {
+                for (int idx = 0; idx < len; idx++) {
+                    if(idx == len-1)
+                        message += temp[idx].substring(0,temp[idx].length()-1);
+                    else
+                        message += temp[idx]+replace;
+                }
+            }
+        }
+        CHAT_REPLACEMENTS.write();
+        return  message;
+    }
 }
