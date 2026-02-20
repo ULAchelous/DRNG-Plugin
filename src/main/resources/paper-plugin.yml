@@ -1,7 +1,7 @@
 name: dr-ng
-version: ' v1.3'
+version: 'v1.3'
 main: io.ula.drng.Main
-api-version: '1.21.11'
+api-version: '1.21.10'
 authors: [ _Achelous ]
 description: Desideraregio - NextGen基本插件
 

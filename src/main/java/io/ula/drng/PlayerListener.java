@@ -70,26 +70,6 @@ public class PlayerListener implements Listener {
         initMetadata(player);
 
         ScoreBoardHelper.createObjective(player);
-
-            BukkitTask login_time_limited = Bukkit.getScheduler().runTaskLater(plugin, () ->{
-                for(Player pl : plugin.getServer().getOnlinePlayers())
-                    if(!pl.getScoreboardTags().contains("tester")) pl.kick(Component.text("长时间未输入内测码").color(TextColor.color(Color.RED.getRGB())));
-            },600L);//超时踢出
-            if(!player.getScoreboardTags().contains("tester")){
-                PotionEffect effect = new PotionEffect(
-                        PotionEffectType.INVISIBILITY,
-                        Integer.MAX_VALUE,
-                        0,
-                        false,
-                        false
-                );
-                player.clearActivePotionEffects();
-                player.addPotionEffect(effect);
-                player.addScoreboardTag("invisibility_flag");
-            }
-            if(player.hasMetadata("been_controlled")){
-                player.removeMetadata("been_controlled", plugin);
-            }
     }
 
     private void initMetadata(Player player) {
@@ -244,16 +224,7 @@ public class PlayerListener implements Listener {
     public void onTick(ServerTickStartEvent event){
         if(event.getTickNumber() % 20 == 0){
             for(Player player : plugin.getServer().getOnlinePlayers()){
-                if(!player.getScoreboardTags().contains("tester")){
-                    player.showTitle(Title.title(Component.text("请输入 ").color(TextColor.color(Color.RED.getRGB()))
-                                    .append(Component.text("内测码").color(TextColor.color(Color.YELLOW.getRGB())))
-                                    .append(Component.text(" 来加入游戏").color(TextColor.color(Color.RED.getRGB())))
-                            , Component.empty()));
-                }else if(player.getScoreboardTags().contains("invisibility_flag")){
-                    player.removePotionEffect(PotionEffectType.INVISIBILITY);
-                    player.removeScoreboardTag("invisibility_flag");
-                }
-                if(player.getScoreboardTags().contains("fly") || player.getScoreboardTags().contains("invisibility_flag")){
+                if(player.getScoreboardTags().contains("fly")){
                     player.setAllowFlight(true);
                 }else if(player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR){
                     player.setAllowFlight(false);
