@@ -48,10 +48,10 @@ public class ConfigFile {
         }
         LOGGER.info(String.format("Loaded config file \"%s\"",file_name));
     }
-    public void addKey(String name,String key){jsonObject.addProperty(name,key);write();reload();}
-    public void addKey(String name,Boolean key){jsonObject.addProperty(name,key);write();reload();}
-    public void addKey(String name,Number key){jsonObject.addProperty(name,key);write();reload();}
-    public void addKey(String name,JsonElement key){jsonObject.add(name,key);write();reload();}
+    public void addKey(String name,String key){jsonObject.addProperty(name,key);write();}
+    public void addKey(String name,Boolean key){jsonObject.addProperty(name,key);write();}
+    public void addKey(String name,Number key){jsonObject.addProperty(name,key);write();}
+    public void addKey(String name,JsonElement key){jsonObject.add(name,key);write();}
 
     public void removeKey(String name){jsonObject.remove(name);write();reload();}
 

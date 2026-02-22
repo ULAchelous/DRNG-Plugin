@@ -22,6 +22,9 @@ import org.bukkit.entity.Player;
 import java.awt.*;
 import java.time.Duration;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CompletableFuture;
 
 import static io.ula.drng.config.Configs.CHAT_REPLACEMENTS;
 
@@ -36,13 +39,15 @@ public class BindCmd {
                                         String key = context.getArgument("key",String.class);
                                         String _replace = context.getArgument("_replace",String.class);
                                         for(Player target : targets){
-                                            String targetName = target.getName();
-                                            JsonObject bind = new JsonObject();
-                                            bind.addProperty("key",key);
-                                            bind.addProperty("replace",_replace);
-                                            if(!CHAT_REPLACEMENTS.has(targetName))
-                                                CHAT_REPLACEMENTS.addKey(targetName,new JsonArray());
-                                            CHAT_REPLACEMENTS.getKey(targetName).getAsJsonArray().add(bind);
+                                            if(target instanceof Player) {
+                                                String targetName = target.getName();
+                                                JsonObject bind = new JsonObject();
+                                                bind.addProperty("key", key);
+                                                bind.addProperty("replace", _replace);
+                                                if (!CHAT_REPLACEMENTS.has(targetName))
+                                                    CHAT_REPLACEMENTS.addKey(targetName, new JsonArray());
+                                                CHAT_REPLACEMENTS.getKey(targetName).getAsJsonArray().add(bind);
+                                            }
                                         }
                                         CHAT_REPLACEMENTS.write();
                                         context.getSource().getSender().sendMessage(Component.text("添加成功"));
@@ -77,8 +82,8 @@ public class BindCmd {
                                         bind.addProperty("replace",_replace);
                                         if(!CHAT_REPLACEMENTS.has(targetName))
                                             CHAT_REPLACEMENTS.addKey(targetName,new JsonArray());
-                                        CHAT_REPLACEMENTS.getKey(targetName).getAsJsonArray().add(bind);
-                                        CHAT_REPLACEMENTS.write();
+                                        CompletableFuture.runAsync(() -> CHAT_REPLACEMENTS.getKey(targetName).getAsJsonArray().add(bind))
+                                                        .thenRun(() -> CHAT_REPLACEMENTS.write());
                                         target.sendMessage(Component.text("添加成功"));
                                         return 0;
                                     })
