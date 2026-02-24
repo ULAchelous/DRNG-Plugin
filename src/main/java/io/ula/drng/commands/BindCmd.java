@@ -22,8 +22,6 @@ import org.bukkit.entity.Player;
 import java.awt.*;
 import java.time.Duration;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 
 import static io.ula.drng.config.Configs.CHAT_REPLACEMENTS;

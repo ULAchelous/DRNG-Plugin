@@ -256,6 +256,8 @@ public class PlayerListener implements Listener {
 
     public static String getPlayerChatMsg(String message,Player player){
         CHAT_REPLACEMENTS.reload();
+        if(!CHAT_REPLACEMENTS.has(player.getName()))
+            CHAT_REPLACEMENTS.addKey(player.getName(),new JsonArray());
         JsonArray array = CHAT_REPLACEMENTS.getKey(player.getName()).getAsJsonArray();
         for (int i=0;i<array.size();i++){
             JsonElement element = array.get(i);
