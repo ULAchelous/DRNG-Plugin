@@ -92,8 +92,6 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerBreakBlk(BlockBreakEvent event){
         Player player = event.getPlayer();
-        if(!event.getPlayer().getScoreboardTags().contains("tester"))
-            event.setCancelled(true);
         if(event.getPlayer().hasMetadata("controlling_player")){
             java.util.UUID UUID = (java.util.UUID)event.getPlayer().getMetadata("controlling_player").getFirst().value();
             Player target = Bukkit.getPlayer(UUID);
@@ -218,7 +216,7 @@ public class PlayerListener implements Listener {
                 }else if(player.getGameMode() != GameMode.CREATIVE && player.getGameMode() != GameMode.SPECTATOR){
                     player.setAllowFlight(false);
                 }
-            }//内测相关逻辑
+            }
         }
     }
 
