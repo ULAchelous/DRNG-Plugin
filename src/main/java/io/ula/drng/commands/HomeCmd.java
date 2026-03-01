@@ -33,11 +33,14 @@ public class HomeCmd {
                             .executes(context -> {
                                 Player sender = (Player)context.getSource().getSender();
                                 String id = context.getArgument("id",String.class);
+                                int num = 0;
                                 if(!PLAYER_HOMES.has(sender.getName()))
                                     PLAYER_HOMES.addKey(sender.getName(), new JsonArray());
                                 if(!PLAYER_HOMES.has("maxCount"))
                                     PLAYER_HOMES.addKey("maxCount", 3);
-                                if(PLAYER_HOMES.getKey(sender.getName()).getAsJsonArray().size() > PLAYER_HOMES.getKey("maxCount").getAsInt()){
+                                for(JsonElement element : PLAYER_HOMES.getKey(sender.getName()).getAsJsonArray())
+                                    if(!element.getAsJsonObject().has("removed")) num++;
+                                if(num > PLAYER_HOMES.getKey("maxCount").getAsInt()){
                                     sender.sendMessage(Component.text("标记点数量到达上限", TextColor.color(Color.RED.getRGB())));
                                     return 0;
                                 }

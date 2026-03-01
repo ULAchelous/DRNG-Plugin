@@ -63,15 +63,10 @@ public class PlayerListener implements Listener {
 
     private void initMetadata(Player player) {
         player.setMetadata("onlineTime",new FixedMetadataValue(plugin,0));
-        player.setMetadata("onlineTimeCache",new FixedMetadataValue(plugin,0));
         if(!player.hasMetadata("deathCount"))
             player.setMetadata("deathCount", new FixedMetadataValue(plugin,0));
         if(!player.hasMetadata("digCount"))
             player.setMetadata("digCount", new FixedMetadataValue(plugin,0));
-        if(!player.hasMetadata("deathCountCache"))
-            player.setMetadata("deathCountCache", new FixedMetadataValue(plugin,0));
-        if(!player.hasMetadata("digCountCache"))
-            player.setMetadata("digCountCache", new FixedMetadataValue(plugin,0));
     }
 
     @EventHandler
@@ -79,7 +74,6 @@ public class PlayerListener implements Listener {
         Player player = (Player)event.getPlayer();
 
         player.removeMetadata("onlineTime",plugin);
-        player.removeMetadata("onlineTimeCache",plugin);
         Component quitMsg = Component.text("");
         if(PLAYER_TITLES.has(player.getName()))
             quitMsg = quitMsg.append(getPlayerTitles(player));
@@ -98,12 +92,10 @@ public class PlayerListener implements Listener {
             java.util.UUID UUID = (java.util.UUID)event.getPlayer().getMetadata("controlling_player").getFirst().value();
             Player target = Bukkit.getPlayer(UUID);
             target.breakBlock(event.getBlock());
-            target.setMetadata("digCountCache",new FixedMetadataValue(plugin,target.getMetadata("digCount").getFirst().asInt()));
             target.setMetadata("digCount",new FixedMetadataValue(plugin,target.getMetadata("digCount").getFirst().asInt()+1));
             ScoreBoardHelper.updateScores(target,2);
             event.setCancelled(true);
         }
-        player.setMetadata("digCountCache",new FixedMetadataValue(plugin,player.getMetadata("digCount").getFirst().asInt()));
         player.setMetadata("digCount",new FixedMetadataValue(plugin,player.getMetadata("digCount").getFirst().asInt()+1));
         ScoreBoardHelper.updateScores(player,2);
     }
@@ -115,7 +107,6 @@ public class PlayerListener implements Listener {
             player.playEffect(player.getLocation(), Effect.END_PORTAL_FRAME_FILL,0);
             event.setCancelled(true);
         }
-        player.setMetadata("deathCountCache",new FixedMetadataValue(plugin,player.getMetadata("deathCount").getFirst().asInt()));
         player.setMetadata("deathCount",new FixedMetadataValue(plugin,player.getMetadata("deathCount").getFirst().asInt()+1));
         ScoreBoardHelper.updateScores(player,1);
     }

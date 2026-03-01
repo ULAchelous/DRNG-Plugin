@@ -65,15 +65,15 @@ public class ScoreBoardHelper {
         //更新数值
         switch(type) {
             case 1:
-                player.getScoreboard().resetScores(String.format("死亡计数: §b§l%d", player.getMetadata("deathCountCache").getFirst().asInt()));
+                player.getScoreboard().resetScores(String.format("死亡计数: §b§l%d", player.getMetadata("deathCount").getFirst().asInt() -1 ));
                 objective.getScore(String.format("死亡计数: §b§l%d", player.getMetadata("deathCount").getFirst().asInt())).setScore(8);
                 break;
             case 2:
-                player.getScoreboard().resetScores(String.format("挖掘计数: §b§l%d", player.getMetadata("digCountCache").getFirst().asInt()));
+                player.getScoreboard().resetScores(String.format("挖掘计数: §b§l%d", player.getMetadata("digCount").getFirst().asInt() -1));
                 objective.getScore(String.format("挖掘计数: §b§l%d", player.getMetadata("digCount").getFirst().asInt())).setScore(7);
                 break;
             case 3:
-                player.getScoreboard().resetScores("在线时长: " + getOnlineTime(player.getMetadata("onlineTimeCache").getFirst().asInt()));
+                player.getScoreboard().resetScores("在线时长: " + getOnlineTime(player.getMetadata("onlineTime").getFirst().asInt() -1));
                 objective.getScore("在线时长: " + getOnlineTime(player.getMetadata("onlineTime").getFirst().asInt())).setScore(9);
                 break;
         }
