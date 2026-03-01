@@ -60,23 +60,28 @@ public class ConfigFile {
     public Boolean has(String name){return  jsonObject.has(name);};
 
     public void write(){
-
-        try {
-            Files.write(Path.of(file.toURI()), gson.toJson(jsonObject).getBytes());
-        }catch(IOException e){
-            LOGGER.error(String.format("Failed to write config file \"%s\" : ",file_name)+e.getMessage());
-            return;
-        }
+        Thread thread = new Thread(() -> {
+            try {
+                Files.write(Path.of(file.toURI()), gson.toJson(jsonObject).getBytes());
+            }catch(IOException e){
+                LOGGER.error(String.format("Failed to write config file \"%s\" : ",file_name)+e.getMessage());
+                return;
+            }
+        });
+        thread.start();
     }
 
     public void reload(){
-        String list;
-        try {
-            list = new String(Files.readAllBytes(Path.of(file.toURI())));
-            jsonObject = JsonParser.parseString(list).getAsJsonObject();
-        }catch(Exception e){
-            LOGGER.error(String.format("Failed to read config file \"%s\" : ",file_name) + e.getMessage());
-            return;
-        }
+        Thread thread = new Thread(() -> {
+            String list;
+            try {
+                list = new String(Files.readAllBytes(Path.of(file.toURI())));
+                jsonObject = JsonParser.parseString(list).getAsJsonObject();
+            }catch(Exception e){
+                LOGGER.error(String.format("Failed to read config file \"%s\" : ",file_name) + e.getMessage());
+                return;
+            }
+        });
+        thread.start();
     }
 }

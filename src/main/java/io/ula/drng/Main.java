@@ -60,29 +60,35 @@ public final class Main extends JavaPlugin {
             getServer().sendMessage(Component.text(tips.get(new Random().nextInt(tips.size())).getAsString()));
         },1800*20,1800*20);//定时发送提示
         scheduler.runTaskTimer(this,() ->{
-            if(getServer().getOnlinePlayers().size() >= 3000) {
-                int owCnt = 0, netherCnt = 0, teCnt = 0;
-                World overworld = Bukkit.getWorld(Key.key("overworld"));
-                World nether = Bukkit.getWorld(Key.key("the_nether"));
-                World the_end = Bukkit.getWorld(Key.key("the_end"));
+            int owCnt = 0, netherCnt = 0, teCnt = 0;
+            World overworld = Bukkit.getWorld(Key.key("overworld"));
+            World nether = Bukkit.getWorld(Key.key("the_nether"));
+            World the_end = Bukkit.getWorld(Key.key("the_end"));
+            if(overworld.getEntities().size() >= 2700) {
                 for (Entity entity : overworld.getEntities()) {
                     if (entity.getType() == EntityType.ITEM) {
                         entity.remove();
                         owCnt++;
                     }
                 }
+            }
+            if(nether.getEntities().size() >= 2700){
                 for (Entity entity : nether.getEntities()) {
                     if (entity.getType() == EntityType.ITEM) {
                         entity.remove();
                         netherCnt++;
                     }
                 }
+            }
+            if(the_end.getEntities().size() >= 2700) {
                 for (Entity entity : the_end.getEntities()) {
                     if (entity.getType() == EntityType.ITEM) {
                         entity.remove();
                         teCnt++;
                     }
                 }
+            }
+            if((owCnt | netherCnt | teCnt) != 0) {
                 getServer().sendMessage(Component.empty()
                         .append(Component.object(ObjectContents.playerHead("AZ9C")))
                         .append(Component.text("["))

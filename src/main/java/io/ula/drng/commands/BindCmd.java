@@ -22,8 +22,6 @@ import org.bukkit.entity.Player;
 import java.awt.*;
 import java.time.Duration;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 
 import static io.ula.drng.config.Configs.CHAT_REPLACEMENTS;
@@ -117,7 +115,7 @@ public class BindCmd {
                     .append(Component.text(String.format("\"%s\"",replace), TextColor.color(Color.cyan.getRGB())).append(Component.space()))
                     .append(Component.object(ObjectContents.sprite(Key.key("gui"),Key.key("pending_invite/reject")))
                             .clickEvent(ClickEvent.callback(audience -> {
-                                element.getAsJsonObject().addProperty("removed",true);
+                                CHAT_REPLACEMENTS.getKey(player.getName()).getAsJsonArray().get(ii-1).getAsJsonObject().addProperty("removed",true);
                                 audience.sendMessage(Component.text("删除了")
                                         .append(Component.space())
                                         .append(Component.text(ii,TextColor.color(Color.RED.getRGB())))
