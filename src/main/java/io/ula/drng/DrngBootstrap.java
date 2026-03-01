@@ -9,6 +9,7 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.action.DialogAction;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import io.papermc.paper.registry.data.dialog.input.SingleOptionDialogInput;
 import io.papermc.paper.registry.data.dialog.input.TextDialogInput;
@@ -17,6 +18,7 @@ import io.papermc.paper.registry.event.RegistryEvents;
 import io.papermc.paper.registry.keys.DialogKeys;
 import io.ula.drng.commands.*;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickCallback;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -27,17 +29,22 @@ import net.kyori.adventure.text.object.ObjectContents;
 import org.bukkit.Bukkit;
 
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.ula.drng.config.Configs.*;
 
 public class DrngBootstrap implements PluginBootstrap {
     @Override
-    public void bootstrap(BootstrapContext context){
-        context.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS,commands -> {
+    public void bootstrap(BootstrapContext context) {
+        context.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             commands.registrar().register(PermissionCmd.buildpms);
             commands.registrar().register(ControlCmd.buildCCmd);
             commands.registrar().register(NoticeCmd.noticeCmd);
@@ -53,67 +60,88 @@ public class DrngBootstrap implements PluginBootstrap {
                                 .base(DialogBase
                                         .builder(Component.text("发布公告"))
                                         .inputs(List.of(
-                                                DialogInput.text("author",Component.text("发布者")).build(),
-                                                DialogInput.text("content",400,Component.text("正文"),true,"",132, TextDialogInput.MultilineOptions.create(15,100)),//正文
-                                                DialogInput.singleOption("time_limit",Component.text("时间期限"),List.of(
-                                                        SingleOptionDialogInput.OptionEntry.create("1",Component.text("1天"),true),
-                                                        SingleOptionDialogInput.OptionEntry.create("5",Component.text("5天"),false),
-                                                        SingleOptionDialogInput.OptionEntry.create("30",Component.text("30天"),false)
-                                                )).build(),
-                                                DialogInput.bool("accept",Component.text("我承诺，我同意希望之地的最终用户许可协议")).build()
-                                            )
+                                                        DialogInput.text("author",Component.text("发布者")).build(),
+                                                        DialogInput.text("content",400,Component.text("正文"),true,"",132, TextDialogInput.MultilineOptions.create(15,100)),//正文
+                                                        DialogInput.singleOption("time_limit",Component.text("时间期限"),List.of(
+                                                                SingleOptionDialogInput.OptionEntry.create("1",Component.text("1天"),true),
+                                                                SingleOptionDialogInput.OptionEntry.create("5",Component.text("5天"),false),
+                                                                SingleOptionDialogInput.OptionEntry.create("30",Component.text("30天"),false)
+                                                        )).build(),
+                                                        DialogInput.bool("accept",Component.text("我承诺，我同意希望之地的最终用户许可协议")).build()
+                                                )
                                         )//对话框中的输入部分
                                         .build())
                                 .type(DialogType.confirmation(
-                                        ActionButton.create(Component.text("取消")
-                                                .append(Component.object(ObjectContents.sprite(Key.key("gui"),Key.key("pending_invite/reject")))),
-                                                Component.text("点击以取消发布公告"),
-                                                120,
-                                                null
-                                        )
-                                        ,ActionButton.create(Component.text("确认")
-                                                .append(Component.object(ObjectContents.sprite(Key.key("gui"),Key.key("pending_invite/accept")))),
-                                                Component.text(("点击以发布公告")),
-                                                120,
-                                                DialogAction.customClick(
-                                                        (view,audience) -> {
-                                                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-                                                                    .withZone(ZoneId.of("Asia/Shanghai"));
-                                                            String author = view.getText("author");
-                                                            String notice_content = view.getText("content");
-                                                            JsonObject notice = new JsonObject();
-                                                            notice.addProperty("author",author);
-                                                            notice.addProperty("content",notice_content);
-                                                            notice.addProperty("created_time",formatter.format(LocalDate.now(ZoneId.of("Asia/Shanghai"))));
-                                                            notice.addProperty("deadline",formatter.format(LocalDate.now(ZoneId.of("Asia/Shanghai")).plusDays(Integer.parseInt(view.getText("time_limit")))));
-                                                            if(view.getBoolean("accept")){
-                                                                if(DRNG_NOTICES.has("notices")){
-                                                                    DRNG_NOTICES.getKey("notices").getAsJsonArray().add(notice);
-                                                                    DRNG_NOTICES.write();
-                                                                }else{
-                                                                    DRNG_NOTICES.addKey("notices",new JsonArray());
-                                                                    DRNG_NOTICES.getKey("notices").getAsJsonArray().add(notice);
-                                                                    DRNG_NOTICES.write();
-                                                                }
-                                                                Bukkit.getServer().sendMessage(Component.text("公告板上有新的信息！").color(TextColor.color(Color.yellow.getRGB())).decorate(TextDecoration.BOLD)
-                                                                        .hoverEvent(HoverEvent.showText(Component.text("点击以查看详情",TextColor.color(Color.cyan.getRGB()))))
-                                                                        .clickEvent(ClickEvent.callback(audience_ -> {
-                                                                            audience_.openBook(NoticeCmd.getNoticeBook());
-                                                                        }))
-                                                                );
-                                                            }else{
-                                                                audience.sendMessage(Component.text("因为未同意许可，公告未发送").color(TextColor.color(Color.RED.getRGB())));
-                                                            }
-                                                        },//发布公告后对话框的相应逻辑
-                                                        ClickCallback.Options.builder()
-                                                                .uses(Integer.MAX_VALUE)
-                                                                .lifetime(ClickCallback.DEFAULT_LIFETIME)
-                                                                .build()
+                                                ActionButton.create(Component.text("取消")
+                                                                .append(Component.object(ObjectContents.sprite(Key.key("gui"),Key.key("pending_invite/reject")))),
+                                                        Component.text("点击以取消发布公告"),
+                                                        120,
+                                                        null
                                                 )
-                                        )
+                                                ,ActionButton.create(Component.text("确认")
+                                                                .append(Component.object(ObjectContents.sprite(Key.key("gui"),Key.key("pending_invite/accept")))),
+                                                        Component.text(("点击以发布公告")),
+                                                        120,
+                                                        DialogAction.customClick(
+                                                                (view,audience) -> {
+                                                                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+                                                                            .withZone(ZoneId.of("Asia/Shanghai"));
+                                                                    String author = view.getText("author");
+                                                                    String notice_content = view.getText("content");
+                                                                    JsonObject notice = new JsonObject();
+                                                                    notice.addProperty("author",author);
+                                                                    notice.addProperty("content",notice_content);
+                                                                    notice.addProperty("created_time",formatter.format(LocalDate.now(ZoneId.of("Asia/Shanghai"))));
+                                                                    notice.addProperty("deadline",formatter.format(LocalDate.now(ZoneId.of("Asia/Shanghai")).plusDays(Integer.parseInt(view.getText("time_limit")))));
+                                                                    if(view.getBoolean("accept")){
+                                                                        if(DRNG_NOTICES.has("notices")){
+                                                                            DRNG_NOTICES.getKey("notices").getAsJsonArray().add(notice);
+                                                                            DRNG_NOTICES.write();
+                                                                        }else{
+                                                                            DRNG_NOTICES.addKey("notices",new JsonArray());
+                                                                            DRNG_NOTICES.getKey("notices").getAsJsonArray().add(notice);
+                                                                            DRNG_NOTICES.write();
+                                                                        }
+                                                                        Bukkit.getServer().sendMessage(Component.text("公告板上有新的信息！").color(TextColor.color(Color.yellow.getRGB())).decorate(TextDecoration.BOLD)
+                                                                                .hoverEvent(HoverEvent.showText(Component.text("点击以查看详情",TextColor.color(Color.cyan.getRGB()))))
+                                                                                .clickEvent(ClickEvent.callback(audience_ -> {
+                                                                                    audience_.openBook(NoticeCmd.getNoticeBook());
+                                                                                }))
+                                                                        );
+                                                                    }else{
+                                                                        audience.sendMessage(Component.text("因为未同意许可，公告未发送").color(TextColor.color(Color.RED.getRGB())));
+                                                                    }
+                                                                },//发布公告后对话框的相应逻辑
+                                                                ClickCallback.Options.builder()
+                                                                        .uses(Integer.MAX_VALUE)
+                                                                        .lifetime(ClickCallback.DEFAULT_LIFETIME)
+                                                                        .build()
+                                                        )
+                                                )
                                         )
                                 )
                 ))
         );//注册对话框
+
+        InputStream is = Main.class.getClassLoader().getResourceAsStream("EULA");
+        String eula = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+        context.getLifecycleManager().registerEventHandler(RegistryEvents.DIALOG.compose().newHandler(contextEULA -> contextEULA.registry().register(
+                DialogKeys.create(Key.key("drng:eula")),
+                builder -> builder.base(DialogBase.builder(Component.text("希望之地 - 次世代(Desideraregio - NextGen)最终用户许可协议"))
+                        .body(List.of(DialogBody.plainMessage(Component.text(eula),600)))
+                        .canCloseWithEscape(false)
+                        .build()
+                )
+                        .type(DialogType.confirmation(
+                                ActionButton.builder(Component.text("拒绝").append(Component.object(ObjectContents.sprite(Key.key("gui"),Key.key("pending_invite/reject")))))
+                                        .tooltip(Component.text("拒绝协议并退出服务器"))
+                                        .action(DialogAction.customClick(Key.key("drng:eula/disagree"),null))
+                                        .build(),
+                                ActionButton.builder(Component.text("同意").append(Component.object(ObjectContents.sprite(Key.key("gui"),Key.key("pending_invite/accept")))))
+                                        .tooltip(Component.text("同意协议并进入服务器"))
+                                        .action(DialogAction.customClick(Key.key("drng:eula/agree"),null))
+                                        .build()
+                        ))
+        )));
     }
 }

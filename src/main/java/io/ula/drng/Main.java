@@ -8,7 +8,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.object.ObjectContents;
-import net.kyori.adventure.text.object.PlayerHeadObjectContents;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bukkit.Bukkit;
@@ -35,7 +34,7 @@ public final class Main extends JavaPlugin {
         ControlCmd.plugin = this;
         //为命令类的plugin对象传值
         ScoreBoardHelper.init(this);
-        registCommands();
+        eventRegister();
         startTasks();
     }
 
@@ -43,8 +42,9 @@ public final class Main extends JavaPlugin {
     public void onDisable(){
 
     }
-    private void registCommands(){
-        this.getServer().getPluginManager().registerEvents(new PlayerListener(this),this);
+    private void eventRegister(){
+        this.getServer().getPluginManager().registerEvents(new PlayerBehaviourListener(this),this);
+        this.getServer().getPluginManager().registerEvents(new ServerJoinListener(this),this);
     }
 
     private void startTasks(){
