@@ -80,8 +80,7 @@ public class BindCmd {
                                         bind.addProperty("replace",_replace);
                                         if(!CHAT_REPLACEMENTS.has(targetName))
                                             CHAT_REPLACEMENTS.addKey(targetName,new JsonArray());
-                                        CompletableFuture.runAsync(() -> CHAT_REPLACEMENTS.getKey(targetName).getAsJsonArray().add(bind))
-                                                        .thenRun(() -> CHAT_REPLACEMENTS.write());
+                                        CHAT_REPLACEMENTS.getKey(targetName).getAsJsonArray().add(bind);
                                         target.sendMessage(Component.text("添加成功"));
                                         return 0;
                                     })

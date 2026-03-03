@@ -1,17 +1,23 @@
-package io.ula.drng;
+package io.ula.drng.utils;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import io.ula.drng.ScoreBoardHelper;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.awt.*;
 
 import static io.ula.drng.Main.LOGGER;
-import static io.ula.drng.config.Configs.CHAT_REPLACEMENTS;
-import static io.ula.drng.config.Configs.PLAYER_TITLES;
+import static io.ula.drng.config.Configs.*;
+import static org.bukkit.Bukkit.getOnlinePlayers;
+import static org.bukkit.Bukkit.getServer;
 
 public class PlayerUtils {
     public static Component getPlayerTitles(Player player) {
@@ -75,5 +81,48 @@ public class PlayerUtils {
         }
         CHAT_REPLACEMENTS.write();
         return  message;
+    }
+
+    public static Component getPlayerLoginMsg(Player player){
+        if(player.isOp())
+            return  Component.empty();
+        Component loginMsg = Component.text("");
+        if(PLAYER_TITLES.has(player.getName()))
+            loginMsg = loginMsg.append(PlayerUtils.getPlayerTitles(player));
+        loginMsg = loginMsg.append(Component.text(player.getName()))
+                .append(Component.text("，欢迎回来～").decorate(TextDecoration.BOLD));
+        return loginMsg;
+    }
+
+    public static void playerUpdateOnlineTime(JavaPlugin plugin){
+        for (Player player : getServer().getOnlinePlayers()) {
+            if (player.hasMetadata("onlineTime")) {
+                int value = player.getMetadata("onlineTime").getFirst().asInt();
+                player.setMetadata("onlineTime", new FixedMetadataValue(plugin, value + 1));
+                ScoreBoardHelper.updateScores(player, 3);
+            }
+        }
+    }
+
+    public static void balanceFunction(){
+        for(Player player : getServer().getOnlinePlayers()){
+            if(player.isOp() && CONFIG.getKey("balancedOp").getAsBoolean())
+                player.setGameMode(GameMode.SPECTATOR);
+            if(player.getGameMode().equals(GameMode.CREATIVE) && !CONFIG.getKey("allowCreativeMode").getAsBoolean())
+                player.setGameMode(GameMode.SURVIVAL);
+        }
+    }
+
+    public static void initPlayerStatus(Player player,JavaPlugin plugin){
+        player.setMetadata("onlineTime",new FixedMetadataValue(plugin,0));
+        if(!player.hasMetadata("deathCount"))
+            player.setMetadata("deathCount", new FixedMetadataValue(plugin,0));
+        if(!player.hasMetadata("digCount"))
+            player.setMetadata("digCount", new FixedMetadataValue(plugin,0));
+        //init Metadata
+
+        if(player.isOp()&&CONFIG.getKey("balancedOp").getAsBoolean()) player.setGameMode(GameMode.SPECTATOR);
+        if (player.getGameMode().equals(GameMode.SPECTATOR) && !player.isOp())
+            player.setGameMode(GameMode.SURVIVAL);
     }
 }

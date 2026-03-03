@@ -6,6 +6,7 @@ import io.papermc.paper.event.connection.configuration.AsyncPlayerConnectionConf
 import io.papermc.paper.event.player.PlayerCustomClickEvent;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import io.ula.drng.utils.PlayerUtils;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.dialog.DialogLike;
 import net.kyori.adventure.key.Key;
@@ -78,24 +79,12 @@ public class ServerJoinListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        Component loginMsg = Component.text("");
-        if(PLAYER_TITLES.has(player.getName()))
-            loginMsg = loginMsg.append(PlayerUtils.getPlayerTitles(player));
-        loginMsg = loginMsg.append(Component.text(player.getName()))
-                .append(Component.text("，欢迎回来～").decorate(TextDecoration.BOLD));
-        event.joinMessage(loginMsg);//欢迎消息
 
-        initMetadata(player);
+        event.joinMessage(PlayerUtils.getPlayerLoginMsg(player));//欢迎消息
+
+        PlayerUtils.initPlayerStatus(player,plugin);
 
         ScoreBoardHelper.createObjective(player);
-    }
-
-    private void initMetadata(Player player) {
-        player.setMetadata("onlineTime",new FixedMetadataValue(plugin,0));
-        if(!player.hasMetadata("deathCount"))
-            player.setMetadata("deathCount", new FixedMetadataValue(plugin,0));
-        if(!player.hasMetadata("digCount"))
-            player.setMetadata("digCount", new FixedMetadataValue(plugin,0));
     }
     private void setConnectionJoinResult(UUID uniqueId, boolean value) {
         CompletableFuture<Boolean> future = awaitResponse.get(uniqueId);

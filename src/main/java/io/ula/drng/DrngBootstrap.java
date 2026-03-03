@@ -61,6 +61,7 @@ public class DrngBootstrap implements PluginBootstrap {
                                         .builder(Component.text("发布公告"))
                                         .inputs(List.of(
                                                         DialogInput.text("author",Component.text("发布者")).build(),
+                                                        DialogInput.text("introduction",400 ,Component.text("简介"),true,"",20,TextDialogInput.MultilineOptions.create(1,20)),
                                                         DialogInput.text("content",400,Component.text("正文"),true,"",132, TextDialogInput.MultilineOptions.create(15,100)),//正文
                                                         DialogInput.singleOption("time_limit",Component.text("时间期限"),List.of(
                                                                 SingleOptionDialogInput.OptionEntry.create("1",Component.text("1天"),true),
@@ -87,9 +88,11 @@ public class DrngBootstrap implements PluginBootstrap {
                                                                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
                                                                             .withZone(ZoneId.of("Asia/Shanghai"));
                                                                     String author = view.getText("author");
+                                                                    String introduction = view.getText("introduction");
                                                                     String notice_content = view.getText("content");
                                                                     JsonObject notice = new JsonObject();
                                                                     notice.addProperty("author",author);
+                                                                    notice.addProperty("introduction",introduction);
                                                                     notice.addProperty("content",notice_content);
                                                                     notice.addProperty("created_time",formatter.format(LocalDate.now(ZoneId.of("Asia/Shanghai"))));
                                                                     notice.addProperty("deadline",formatter.format(LocalDate.now(ZoneId.of("Asia/Shanghai")).plusDays(Integer.parseInt(view.getText("time_limit")))));

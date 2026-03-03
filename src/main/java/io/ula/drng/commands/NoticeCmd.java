@@ -59,16 +59,16 @@ public class NoticeCmd {
                     continue;
                 }
                 book.addPage(Component.empty()
-                        .append(Component.text("发布者:").color(TextColor.color(Color.YELLOW.getRGB())).decorate(TextDecoration.BOLD))
+                        .append(Component.text("发布者:").color(TextColor.color(Color.GRAY.getRGB())).decorate(TextDecoration.BOLD))
                         .append(Component.space())
                         .append(Component.text(author))
                         .append(Component.newline())
                         .append(Component.text(content))
                         .append(Component.newline())
-                        .append(Component.text("发布时间：").color(TextColor.color(Color.CYAN.getRGB())))
+                        .append(Component.text("发布时间：").color(TextColor.color(Color.GRAY.getRGB())).decorate(TextDecoration.BOLD))
                         .append(Component.text(notice.getAsJsonObject().get("created_time").getAsString()))
                         .append(Component.newline())
-                        .append(Component.text("截止时间：").color(TextColor.color(Color.green.getRGB())))
+                        .append(Component.text("截止时间：").color(TextColor.color(Color.GRAY.getRGB())).decorate(TextDecoration.BOLD))
                         .append(Component.text(notice.getAsJsonObject().get("deadline").getAsString()))
                 );
             }
