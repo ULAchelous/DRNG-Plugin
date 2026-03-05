@@ -4,6 +4,8 @@ import com.google.gson.*;
 import net.kyori.adventure.text.Component;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NonNull;
 
 import java.awt.*;
@@ -12,11 +14,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static io.ula.drng.Main.PLG_ID;
-import static io.ula.drng.Main.serverRoot;
 
 public class ConfigFile {
-    private final Logger LOGGER = LogManager.getLogger(PLG_ID);
+    private File serverRoot = Bukkit.getServer().getWorldContainer();
+    private final Logger LOGGER = LogManager.getLogger();
     private JsonObject jsonObject = new JsonObject();
     private JsonObject defaultContent;
     private Gson gson = new GsonBuilder()
@@ -25,7 +26,8 @@ public class ConfigFile {
     private File file;
     private String file_folder;
     private String file_name;
-    public ConfigFile(@NonNull String name,String folder,JsonObject content){
+    private JavaPlugin ownerPlugin;
+    public ConfigFile(@NonNull String name, String folder, JsonObject content, JavaPlugin plugin){
         if(folder != null) {
             file = new File(String.format(serverRoot.getPath() + "/config/dr-ng/%s/%s", folder, name));
         }else{
@@ -34,6 +36,7 @@ public class ConfigFile {
         file_name = name;
         file_folder = folder;
         defaultContent = content;
+        ownerPlugin = plugin;
         init();
     }
     public void init(){
@@ -66,7 +69,7 @@ public class ConfigFile {
                     LOGGER.error(String.format("Failed to create config file \"%s\" : ", file_name) + e.getMessage());
                     return;
                 }
-                addKey("version", "v1.5.1");
+                addKey("version", ownerPlugin.getPluginMeta().getVersion());
             }
         }
         LOGGER.info(String.format("Loaded config file \"%s\"",file_name));

@@ -10,15 +10,18 @@ import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.entity.Player;
 
 import java.util.List;
 
-import static io.ula.drng.Main.LOGGER;
 import static io.ula.drng.config.Configs.*;
 
 public class PermissionCmd {
+    private static final Logger LOGGER = LogManager.getLogger();
     public static final LiteralArgumentBuilder<CommandSourceStack> permission = Commands.literal("pms")
 
             .then(Commands.literal("request")

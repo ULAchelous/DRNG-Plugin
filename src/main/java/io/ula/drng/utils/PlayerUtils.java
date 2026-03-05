@@ -7,6 +7,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -14,12 +16,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.awt.*;
 
-import static io.ula.drng.Main.LOGGER;
 import static io.ula.drng.config.Configs.*;
-import static org.bukkit.Bukkit.getOnlinePlayers;
 import static org.bukkit.Bukkit.getServer;
 
 public class PlayerUtils {
+    private static final Logger LOGGER = LogManager.getLogger();
     public static Component getPlayerTitles(Player player) {
         PLAYER_TITLES.reload();
         Component component = Component.empty();

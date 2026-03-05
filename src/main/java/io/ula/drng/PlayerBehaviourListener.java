@@ -122,13 +122,13 @@ public class PlayerBehaviourListener implements Listener {
     }
     @EventHandler
     public void onPlayerExecute(PlayerCommandPreprocessEvent event){
-        COMMANDS_TO_LOG.reload();
+        LOG_CMD.reload();
         Boolean flag = false;
         Player sender = event.getPlayer();
         String[] arguments = event.getMessage().split(" ");
-        if(!COMMAND_EXECUTE.has(sender.getName()))
-            COMMAND_EXECUTE.addKey(sender.getName(),new JsonArray());
-        for(JsonElement element : COMMANDS_TO_LOG.getKey("commands").getAsJsonArray())
+        if(!LOG_CMD.has(sender.getName()))
+            LOG_CMD.addKey(sender.getName(),new JsonArray());
+        for(JsonElement element : LOG_CMD.getKey("commands").getAsJsonArray())
             if(arguments[0].equals("/"+element.getAsString()))
                 flag = true;
         if(flag) {
@@ -136,8 +136,8 @@ public class PlayerBehaviourListener implements Listener {
             JsonObject log = new JsonObject();
             log.addProperty("command", event.getMessage());
             log.addProperty("time", formatter.format(LocalDateTime.now()));
-            COMMAND_EXECUTE.getKey(sender.getName()).getAsJsonArray().add(log);
-            COMMAND_EXECUTE.write();
+            LOG_CMD.getKey(sender.getName()).getAsJsonArray().add(log);
+            LOG_CMD.write();
         }
     }
     @EventHandler

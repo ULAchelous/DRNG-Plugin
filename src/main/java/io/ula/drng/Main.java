@@ -18,16 +18,14 @@ import java.io.File;
 
 
 public final class Main extends JavaPlugin {
-    public static final String PLG_ID = "dr-ng";
-    public static final Logger LOGGER = LogManager.getLogger(PLG_ID);
-    public static final File serverRoot = Bukkit.getServer().getWorldContainer();
+    private final String PLG_ID = "dr-ng";
 
     @Override
     public void onEnable() {
         ControlCmd.plugin = this;
         //为命令类的plugin对象传值
         ScoreBoardHelper.init(this);
-        Configs.init();
+        Configs.init(this);
         eventRegister();
         startTasks();
     }
@@ -53,5 +51,7 @@ public final class Main extends JavaPlugin {
 }
 /*
 TODO:滚动公告栏
+TODO:更多配置项
+TODO:优化PLG_ID与VERSION
 TODO:配置文件初始内容
  */
