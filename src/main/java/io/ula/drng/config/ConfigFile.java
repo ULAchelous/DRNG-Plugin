@@ -16,17 +16,17 @@ import java.nio.file.Path;
 
 
 public class ConfigFile {
-    private File serverRoot = Bukkit.getServer().getWorldContainer();
-    private final Logger LOGGER = LogManager.getLogger();
-    private JsonObject jsonObject = new JsonObject();
-    private JsonObject defaultContent;
-    private Gson gson = new GsonBuilder()
+    protected File serverRoot = Bukkit.getServer().getWorldContainer();
+    protected final Logger LOGGER = LogManager.getLogger("dr-ng/config");
+    protected JsonObject jsonObject = new JsonObject();
+    protected JsonObject defaultContent;
+    protected Gson gson = new GsonBuilder()
             .setPrettyPrinting()
             .create();
-    private File file;
-    private String file_folder;
-    private String file_name;
-    private JavaPlugin ownerPlugin;
+    protected File file;
+    protected String file_folder;
+    protected String file_name;
+    protected JavaPlugin ownerPlugin;
     public ConfigFile(@NonNull String name, String folder, JsonObject content, JavaPlugin plugin){
         if(folder != null) {
             file = new File(String.format(serverRoot.getPath() + "/config/dr-ng/%s/%s", folder, name));
@@ -37,17 +37,9 @@ public class ConfigFile {
         file_folder = folder;
         defaultContent = content;
         ownerPlugin = plugin;
-        init();
     }
-    public void init(){
-        if(!Files.exists(Path.of(new File(serverRoot.getPath()+"/config/dr-ng").toURI()))){
-            try{
-                Files.createDirectory(Path.of(new File(serverRoot.getPath()+"/config/dr-ng").toURI()));
-            }catch(IOException e){
-                LOGGER.error("Failed to create config directory :" + e.getMessage());
-                return;
-            }
-        }
+
+    public void createDir(){
         if(file_folder != null && !Files.exists(Path.of(new File(serverRoot.getPath() + "/config/dr-ng/" + file_folder).toURI()))){
             try{
                 Files.createDirectory(Path.of(new File(serverRoot.getPath() + "/config/dr-ng/" + file_folder).toURI()));
@@ -56,6 +48,9 @@ public class ConfigFile {
                 return;
             }
         }
+        LOGGER.info(String.format("Loaded config file \"%s\"",file_name));
+    }
+    public void createFile(){
         if(Files.exists(Path.of(file.toURI()))){
             reload();
         }else{
@@ -72,18 +67,28 @@ public class ConfigFile {
                 addKey("version", ownerPlugin.getPluginMeta().getVersion());
             }
         }
-        LOGGER.info(String.format("Loaded config file \"%s\"",file_name));
     }
-    public void addKey(String name,String key){jsonObject.addProperty(name,key);write();}
-    public void addKey(String name,Boolean key){jsonObject.addProperty(name,key);write();}
-    public void addKey(String name,Number key){jsonObject.addProperty(name,key);write();}
-    public void addKey(String name,JsonElement key){jsonObject.add(name,key);write();}
+    public void removeFile(){
+        if(Files.exists(Path.of(file.toURI()))){
+            try {
+                Files.delete(Path.of(file.toURI()));
+            } catch (IOException e) {
+                LOGGER.error(String.format("Failed to remove config file \"%s\" : ", file_name) + e.getMessage());
+            }
+        }
+    }
+    public void addKey(String name,String key){jsonObject.addProperty(name,key);}
+    public void addKey(String name,Boolean key){jsonObject.addProperty(name,key);}
+    public void addKey(String name,Number key){jsonObject.addProperty(name,key);}
+    public void addKey(String name,JsonElement key){jsonObject.add(name,key);}
 
-    public void removeKey(String name){jsonObject.remove(name);write();}
+    public void removeKey(String name){jsonObject.remove(name);}
 
     public JsonElement getKey(String name){return jsonObject.get(name);}
 
     public Boolean has(String name){return  jsonObject.has(name);};
+
+    public String getName(){return this.file_name;}
 
     public void write(){
         try {

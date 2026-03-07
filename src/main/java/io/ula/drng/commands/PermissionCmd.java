@@ -8,6 +8,9 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import io.ula.drng.Main;
+import io.ula.drng.config.ConfigFile;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.apache.logging.log4j.LogManager;
@@ -22,11 +25,14 @@ import static io.ula.drng.config.Configs.*;
 
 public class PermissionCmd {
     private static final Logger LOGGER = LogManager.getLogger();
+    public static Main ownerPlugin;
+
     public static final LiteralArgumentBuilder<CommandSourceStack> permission = Commands.literal("pms")
 
             .then(Commands.literal("request")
                     .then(Commands.argument("permissions",StringArgumentType.string())
                             .suggests((commandContext, suggestionsBuilder) -> {
+                                ConfigFile DRNG_PERMISSIONS = ownerPlugin.getConfigManager().getConfig(Key.key("drng:pms"));
                                 for(JsonElement pms : DRNG_PERMISSIONS.getKey("permissions_list").getAsJsonArray())
                                     suggestionsBuilder.suggest(pms.getAsString());
                                 return suggestionsBuilder.buildFuture();
@@ -35,6 +41,8 @@ public class PermissionCmd {
                                 Player player = (Player)commandContext.getSource().getSender();
                                 String context = commandContext.getArgument("permissions",String.class);
                                 LOGGER.info(context);
+                                ConfigFile DRNG_PERMISSIONS = ownerPlugin.getConfigManager().getConfig(Key.key("drng:pms"));
+
                                 for(JsonElement pms : DRNG_PERMISSIONS.getKey("permissions_list").getAsJsonArray()){
                                     if(context.equals(pms.getAsString())){
                                         if(player.getScoreboardTags().contains(pms.getAsString())) {
@@ -53,6 +61,7 @@ public class PermissionCmd {
                                         Player player = (Player) commandContext.getSource().getSender();
                                         String pms = commandContext.getArgument("permissions",String.class);
                                         String context = commandContext.getArgument("pms_code",String.class);
+                                        ConfigFile PMS_CODES = ownerPlugin.getConfigManager().getConfig(Key.key("drng:pms_codes"));
                                         for(JsonElement element : PMS_CODES.getKey(pms).getAsJsonArray()){
                                             if(context.equals(element.getAsString())){
                                                 if(player.getScoreboardTags().contains(pms)){
@@ -73,6 +82,7 @@ public class PermissionCmd {
                     .then(Commands.argument("player", ArgumentTypes.players())
                             .then(Commands.argument("permission",StringArgumentType.string())
                                     .suggests((commandContext, suggestionsBuilder) -> {
+                                        ConfigFile DRNG_PERMISSIONS = ownerPlugin.getConfigManager().getConfig(Key.key("drng:pms"));
                                         for(JsonElement pms : DRNG_PERMISSIONS.getKey("permissions_list").getAsJsonArray())
                                             suggestionsBuilder.suggest(pms.getAsString());//添加json中的权限到建议列表
                                         return suggestionsBuilder.buildFuture();
@@ -80,6 +90,7 @@ public class PermissionCmd {
                                         Player player = (Player) commandContext.getSource().getSender();
                                         String pmsName = commandContext.getArgument("permission",String.class);
                                         List<Player> targets = commandContext.getArgument("player", PlayerSelectorArgumentResolver.class).resolve(commandContext.getSource());
+                                        ConfigFile DRNG_PERMISSIONS = ownerPlugin.getConfigManager().getConfig(Key.key("drng:pms"));
                                         for(JsonElement pms : DRNG_PERMISSIONS.getKey("permissions_list").getAsJsonArray()){
                                             if(pmsName.equals(pms.getAsString())){
                                                 for(Player target : targets) {

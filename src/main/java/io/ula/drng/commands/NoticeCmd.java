@@ -7,6 +7,8 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import io.ula.drng.Main;
+import io.ula.drng.config.ConfigFile;
 import net.kyori.adventure.dialog.DialogLike;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.key.Key;
@@ -23,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import static io.ula.drng.config.Configs.*;
 
 public class NoticeCmd {
+    public static Main ownerPlugin;
     static LiteralArgumentBuilder<CommandSourceStack> noticeCmdBuilder = Commands.literal("notice")
             .then(Commands.literal("list")
                     .executes(commandContext -> {
@@ -42,10 +45,12 @@ public class NoticeCmd {
             .requires(commandSourceStack -> (commandSourceStack.getSender() instanceof Player));
     public static LiteralCommandNode<CommandSourceStack> noticeCmd = noticeCmdBuilder.build();
     public static Book getNoticeBook(){
-        DRNG_NOTICES.reload();
         Book.Builder book = Book.book(Component.text("公告栏"),Component.text("Server")).toBuilder();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
                 .withZone(ZoneId.of("Asia/Shanghai"));
+
+        ConfigFile DRNG_NOTICES = ownerPlugin.getConfigManager().getConfig(Key.key("drng:notices"));
+
         if(DRNG_NOTICES.has("notices")) {
             for (int i=0;i<DRNG_NOTICES.getKey("notices").getAsJsonArray().size();i++) {
                 JsonElement notice = DRNG_NOTICES.getKey("notices").getAsJsonArray().get(i);
@@ -55,7 +60,6 @@ public class NoticeCmd {
                 if (LocalDate.now(ZoneId.of("Asia/Shanghai")).isAfter(LocalDate.parse(deadline,formatter))){
                     notice.getAsJsonObject().addProperty("removed",true);
                     DRNG_NOTICES.getKey("notices").getAsJsonArray().set(i,notice);
-                    DRNG_NOTICES.write();
                     continue;
                 }
                 book.addPage(Component.empty()
@@ -76,7 +80,6 @@ public class NoticeCmd {
                 JsonElement notice = DRNG_NOTICES.getKey("notices").getAsJsonArray().get(i);
                 if(notice.getAsJsonObject().has("removed")) {
                     DRNG_NOTICES.getKey("notices").getAsJsonArray().remove(i);
-                    DRNG_NOTICES.write();
                     i=0;
                 }
             }

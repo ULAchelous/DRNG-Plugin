@@ -23,7 +23,7 @@ public class ScoreBoardHelper {
     }
     public static void createObjective(Player player){
         Scoreboard scoreboard = scoreboardManager.getNewScoreboard();
-        Component server_name = Component.text("希").color(TextColor.fromCSSHexString("#00CCFF"))
+        Component server_name = Component.text("希望之地").color(TextColor.fromCSSHexString("#00CCFF"))
                 .append(Component.text("望").color(TextColor.fromCSSHexString("#0099CC")))
                 .append(Component.text("之").color(TextColor.fromCSSHexString("#006699")))
                 .append(Component.text("地").color(TextColor.fromCSSHexString("#003366")))
@@ -48,6 +48,29 @@ public class ScoreBoardHelper {
         health_display.setDisplaySlot(DisplaySlot.PLAYER_LIST);
         player.setScoreboard(scoreboard);
         objectives.put(player.getUniqueId(),sidebar);
+    }
+
+    public static void createHgObjective(Player player) {
+        Scoreboard scoreboard = scoreboardManager.getNewScoreboard();
+        Component server_name = Component.text("希").color(TextColor.fromCSSHexString("#00CCFF"))
+                .append(Component.text("望").color(TextColor.fromCSSHexString("#0099CC")))
+                .append(Component.text("之").color(TextColor.fromCSSHexString("#006699")))
+                .append(Component.text("地").color(TextColor.fromCSSHexString("#003366")))
+                .append(Component.text(" - 猎人游戏").color(TextColor.fromCSSHexString("#CC3333")))
+                .decorate(TextDecoration.ITALIC)
+                .decorate(TextDecoration.BOLD);
+        Objective sidebar = scoreboard.registerNewObjective(player.getName(), Criteria.DUMMY, server_name);
+        Objective health_display = scoreboard.registerNewObjective("health", Criteria.HEALTH, Component.text("health"), RenderType.HEARTS);
+        health_display.setAutoUpdateDisplay(true);
+        sidebar.getScore("§e等待更多玩家").setScore(4);
+        sidebar.getScore("在线时长: " + getOnlineTime(player.getMetadata("onlineTime").getFirst().asInt())).setScore(3);
+        sidebar.getScore(String.format("死亡计数: §b§l%d", player.getMetadata("deathCount").getFirst().asInt())).setScore(2);
+        sidebar.getScore(String.format("挖掘计数: §b§l%d", player.getMetadata("digCount").getFirst().asInt())).setScore(1);
+        sidebar.numberFormat(NumberFormat.blank());
+        sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
+        health_display.setDisplaySlot(DisplaySlot.PLAYER_LIST);
+        player.setScoreboard(scoreboard);
+        objectives.put(player.getUniqueId(), sidebar);
     }
 
     public static void removeObjective(Player player) {
@@ -77,5 +100,8 @@ public class ScoreBoardHelper {
                 objective.getScore("在线时长: " + getOnlineTime(player.getMetadata("onlineTime").getFirst().asInt())).setScore(9);
                 break;
         }
+    }
+    public static Objective getObjective(Player player){
+        return objectives.get(player.getUniqueId());
     }
 }

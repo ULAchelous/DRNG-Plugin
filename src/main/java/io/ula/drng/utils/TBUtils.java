@@ -1,6 +1,8 @@
 package io.ula.drng.utils;
 
 import com.google.gson.JsonArray;
+import io.ula.drng.Main;
+import io.ula.drng.config.ConfigFile;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -14,10 +16,10 @@ import org.bukkit.entity.EntityType;
 import java.awt.*;
 import java.util.Random;
 
-import static io.ula.drng.config.Configs.DRNG_TIPS;
 import static org.bukkit.Bukkit.getServer;
 
 public class TBUtils {
+    public  static Main ownerPlugin;
     public static void aliceBehaviour(){
         int owCnt = 0, netherCnt = 0, teCnt = 0;
         World overworld = Bukkit.getWorld(Key.key("overworld"));
@@ -69,7 +71,7 @@ public class TBUtils {
     }
 
     public static void tipsBehaviour(){
-        DRNG_TIPS.reload();
+        ConfigFile DRNG_TIPS = ownerPlugin.getConfigManager().getConfig(Key.key("drng:tips"));
         JsonArray tips = DRNG_TIPS.getKey("tips").getAsJsonArray();
         getServer().sendMessage(Component.text("[")
                 .decorate(TextDecoration.BOLD)

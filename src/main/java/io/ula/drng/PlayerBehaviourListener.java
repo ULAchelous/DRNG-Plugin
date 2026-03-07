@@ -7,7 +7,9 @@ import com.google.gson.JsonObject;
 import io.papermc.paper.event.player.AsyncChatEvent;
 
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
+import io.ula.drng.config.ConfigFile;
 import io.ula.drng.utils.PlayerUtils;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -36,15 +38,16 @@ import static io.ula.drng.config.Configs.*;
 
 
 public class PlayerBehaviourListener implements Listener {
-    private final JavaPlugin plugin;
+    private final Main plugin;
 
-    public PlayerBehaviourListener(JavaPlugin plugin) {
+    public PlayerBehaviourListener(Main plugin) {
         this.plugin = plugin;
     }
 
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event){
+        ConfigFile PLAYER_TITLES = plugin.getConfigManager().getConfig(Key.key("drng:titles"));
         Player player = (Player)event.getPlayer();
 
         player.removeMetadata("onlineTime",plugin);
@@ -87,13 +90,30 @@ public class PlayerBehaviourListener implements Listener {
     @EventHandler
     public void onPlayerSendingMessages(AsyncChatEvent event){
             Player player = event.getPlayer();
-            Component message = Component.object(ObjectContents.playerHead(player.getUniqueId()))
-                    .append(Component.space())
-                    .append(PlayerUtils.getPlayerTitles(player))//添加头衔
-                    .append(Component.text(String.format("<%s> ",player.getName())))
-                    .append(Component.text(PlayerUtils.getPlayerChatMsg(LegacyComponentSerializer.legacyAmpersand().serialize(event.message()), player)));
-            player.getServer().sendMessage(message);
+            ConfigFile CONFIG = plugin.getConfigManager().getConfig(Key.key("drng:main"));
+            if(CONFIG.getKey("hg_finished").getAsBoolean()) {
+                Component message = Component.object(ObjectContents.playerHead(player.getUniqueId()))
+                        .append(Component.space())
+                        .append(PlayerUtils.getPlayerTitles(player))//添加头衔
+                        .append(Component.text(String.format("<%s> ", player.getName())))
+                        .append(Component.text(PlayerUtils.getPlayerChatMsg(LegacyComponentSerializer.legacyAmpersand().serialize(event.message()), player)));
+                player.getServer().sendMessage(message);
+            }else{
+                player.sendMessage(Component.text("聊天栏已经禁用",TextColor.color(Color.RED.getRGB())));
+            }
             event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPlayerSwitchGamemode(PlayerGameModeChangeEvent event){
+        Player player = event.getPlayer();
+        ConfigFile CONFIG = plugin.getConfigManager().getConfig(Key.key("drng:main"));
+        if(player.isOp() && CONFIG.getKey("balancedOp").getAsBoolean()) {
+            event.setCancelled(true);
+        }
+        if(player.getGameMode().equals(GameMode.CREATIVE) && !CONFIG.getKey("allowCreativeMode").getAsBoolean()) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
@@ -122,10 +142,10 @@ public class PlayerBehaviourListener implements Listener {
     }
     @EventHandler
     public void onPlayerExecute(PlayerCommandPreprocessEvent event){
-        LOG_CMD.reload();
         Boolean flag = false;
         Player sender = event.getPlayer();
         String[] arguments = event.getMessage().split(" ");
+        ConfigFile LOG_CMD = plugin.getConfigManager().getConfig(Key.key("drng:log_cmd"));
         if(!LOG_CMD.has(sender.getName()))
             LOG_CMD.addKey(sender.getName(),new JsonArray());
         for(JsonElement element : LOG_CMD.getKey("commands").getAsJsonArray())
@@ -137,7 +157,6 @@ public class PlayerBehaviourListener implements Listener {
             log.addProperty("command", event.getMessage());
             log.addProperty("time", formatter.format(LocalDateTime.now()));
             LOG_CMD.getKey(sender.getName()).getAsJsonArray().add(log);
-            LOG_CMD.write();
         }
     }
     @EventHandler

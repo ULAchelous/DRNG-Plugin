@@ -8,6 +8,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
+import io.ula.drng.Main;
+import io.ula.drng.config.ConfigFile;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickCallback;
@@ -23,9 +25,9 @@ import org.bukkit.entity.Player;
 import java.awt.*;
 import java.time.Duration;
 
-import static io.ula.drng.config.Configs.PLAYER_HOMES;
 
 public class HomeCmd {
+    public static Main ownerPlugin;
 
     private static LiteralArgumentBuilder<CommandSourceStack> homeCmdBuilder = Commands.literal("home")
             .then(Commands.literal("locate")
@@ -33,6 +35,7 @@ public class HomeCmd {
                             .executes(context -> {
                                 Player sender = (Player)context.getSource().getSender();
                                 String id = context.getArgument("id",String.class);
+                                ConfigFile PLAYER_HOMES = ownerPlugin.getConfigManager().getConfig(Key.key("drng:homes"));
                                 int num = 0;
                                 if(!PLAYER_HOMES.has(sender.getName()))
                                     PLAYER_HOMES.addKey(sender.getName(), new JsonArray());
@@ -50,7 +53,6 @@ public class HomeCmd {
                                 marker.addProperty("world",sender.getWorld().getName());
                                 PLAYER_HOMES.getKey(sender.getName()).getAsJsonArray().add(marker);
                                 sender.sendMessage(Component.text("添加成功",TextColor.color(Color.YELLOW.getRGB()), TextDecoration.BOLD));
-                                PLAYER_HOMES.write();
                                 return 0;
                             })
                     )
@@ -81,7 +83,6 @@ public class HomeCmd {
                     .append(Component.text(id,TextColor.color(Color.YELLOW.getRGB())))
             );
             element.getAsJsonObject().addProperty("removed",true);
-            PLAYER_HOMES.write();
         }, ClickCallback.Options.builder().lifetime(Duration.ofSeconds(15)).build());
     }
     private static ClickEvent getTeleportClickEvent(Player player,JsonElement element){
@@ -94,11 +95,11 @@ public class HomeCmd {
 
     static Component getPlayerHomes(Player player,Boolean flag){
         Component component = Component.empty();
+        ConfigFile PLAYER_HOMES = ownerPlugin.getConfigManager().getConfig(Key.key("drng:homes"));
         for(int idx = 0;idx<PLAYER_HOMES.getKey(player.getName()).getAsJsonArray().size();idx++) {
             JsonElement element = PLAYER_HOMES.getKey(player.getName()).getAsJsonArray().get(idx);
             if(element.getAsJsonObject().has("removed")) {
                 PLAYER_HOMES.getKey(player.getName()).getAsJsonArray().remove(element);
-                PLAYER_HOMES.write();
                 continue;
             }
             String id = element.getAsJsonObject().get("id").getAsString();

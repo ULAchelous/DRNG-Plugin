@@ -17,6 +17,8 @@ import io.papermc.paper.registry.data.dialog.type.DialogType;
 import io.papermc.paper.registry.event.RegistryEvents;
 import io.papermc.paper.registry.keys.DialogKeys;
 import io.ula.drng.commands.*;
+import io.ula.drng.config.ConfigFile;
+import io.ula.drng.config.ConfigManager;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.api.BinaryTagHolder;
 import net.kyori.adventure.text.Component;
@@ -42,6 +44,7 @@ import java.util.stream.Collectors;
 import static io.ula.drng.config.Configs.*;
 
 public class DrngBootstrap implements PluginBootstrap {
+    public static ConfigManager configManager = new ConfigManager();
     @Override
     public void bootstrap(BootstrapContext context) {
         context.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
@@ -91,6 +94,9 @@ public class DrngBootstrap implements PluginBootstrap {
                                                                     String introduction = view.getText("introduction");
                                                                     String notice_content = view.getText("content");
                                                                     JsonObject notice = new JsonObject();
+
+                                                                    ConfigFile DRNG_NOTICES = configManager.getConfig(Key.key("drng:notices"));
+
                                                                     notice.addProperty("author",author);
                                                                     notice.addProperty("introduction",introduction);
                                                                     notice.addProperty("content",notice_content);
@@ -99,11 +105,9 @@ public class DrngBootstrap implements PluginBootstrap {
                                                                     if(view.getBoolean("accept")){
                                                                         if(DRNG_NOTICES.has("notices")){
                                                                             DRNG_NOTICES.getKey("notices").getAsJsonArray().add(notice);
-                                                                            DRNG_NOTICES.write();
                                                                         }else{
                                                                             DRNG_NOTICES.addKey("notices",new JsonArray());
                                                                             DRNG_NOTICES.getKey("notices").getAsJsonArray().add(notice);
-                                                                            DRNG_NOTICES.write();
                                                                         }
                                                                         Bukkit.getServer().sendMessage(Component.text("公告板上有新的信息！").color(TextColor.color(Color.yellow.getRGB())).decorate(TextDecoration.BOLD)
                                                                                 .hoverEvent(HoverEvent.showText(Component.text("点击以查看详情",TextColor.color(Color.cyan.getRGB()))))

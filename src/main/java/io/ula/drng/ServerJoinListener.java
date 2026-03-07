@@ -6,7 +6,9 @@ import io.papermc.paper.event.connection.configuration.AsyncPlayerConnectionConf
 import io.papermc.paper.event.player.PlayerCustomClickEvent;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import io.ula.drng.config.ConfigFile;
 import io.ula.drng.utils.PlayerUtils;
+import io.ula.hg.HgUtils;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.dialog.DialogLike;
 import net.kyori.adventure.key.Key;
@@ -28,21 +30,21 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import static io.ula.drng.config.Configs.PLAYER_EULA;
-import static io.ula.drng.config.Configs.PLAYER_TITLES;
+import static io.ula.drng.config.Configs.*;
 
 public class ServerJoinListener implements Listener {
-    private JavaPlugin plugin;
-    public ServerJoinListener(JavaPlugin plg){this.plugin = plg;}
+    private Main plugin;
+    public ServerJoinListener(Main plg){this.plugin = plg;}
 
     Map<UUID, CompletableFuture<Boolean>> awaitResponse = new ConcurrentHashMap<>();
     @EventHandler
     public void onPlayerConnected(AsyncPlayerConnectionConfigureEvent event){
-        PLAYER_EULA.reload();
         PlayerConfigurationConnection connection = event.getConnection();
         Audience audience = connection.getAudience();
         PlayerProfile profile = event.getConnection().getProfile();
         UUID uuid = profile.getId();
+        ConfigFile PLAYER_EULA = plugin.getConfigManager().getConfig(Key.key("drng:eula"));
+
         if(!PLAYER_EULA.has(uuid.toString())) {
             PLAYER_EULA.addKey(uuid.toString(), false);
         }
@@ -61,11 +63,13 @@ public class ServerJoinListener implements Listener {
     }
     @EventHandler
     void onHandleDialog(PlayerCustomClickEvent event){
-        PLAYER_EULA.reload();
         if(!(event.getCommonConnection() instanceof PlayerConfigurationConnection playerConfigurationConnection))
             return;
         Key key = event.getIdentifier();
         UUID uuid = playerConfigurationConnection.getProfile().getId();
+
+        ConfigFile PLAYER_EULA = plugin.getConfigManager().getConfig(Key.key("drng:eula"));
+
         if(!PLAYER_EULA.getKey(uuid.toString()).getAsBoolean()) {
             if (key.equals(Key.key("drng:eula/disagree"))) {
                 setConnectionJoinResult(uuid, false);
@@ -78,13 +82,26 @@ public class ServerJoinListener implements Listener {
     }
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
+        ConfigFile CONFIG = plugin.getConfigManager().getConfig(Key.key("drng:titles"));
+
         Player player = event.getPlayer();
 
         event.joinMessage(PlayerUtils.getPlayerLoginMsg(player));//欢迎消息
 
         PlayerUtils.initPlayerStatus(player,plugin);
 
-        ScoreBoardHelper.createObjective(player);
+
+        HgUtils.hgPreProcess(plugin,player);
+
+        if(CONFIG.getKey("hg_finished").getAsBoolean())
+            ScoreBoardHelper.createObjective(player);
+        else
+            ScoreBoardHelper.createHgObjective(player);
+
+        if(player.getName().equals("zyl"))
+            player.setMetadata("speedrunner",new FixedMetadataValue(plugin,true));
+        else
+            player.setMetadata("hunter",new FixedMetadataValue(plugin,true));
     }
     private void setConnectionJoinResult(UUID uniqueId, boolean value) {
         CompletableFuture<Boolean> future = awaitResponse.get(uniqueId);

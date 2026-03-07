@@ -10,6 +10,8 @@ import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
+import io.ula.drng.Main;
+import io.ula.drng.config.ConfigFile;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickCallback;
@@ -24,9 +26,9 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static io.ula.drng.config.Configs.CHAT_REPLACEMENTS;
 
 public class BindCmd {
+    public static Main ownerPlugin;
     static LiteralArgumentBuilder<CommandSourceStack> bindCmdBuilder = Commands.literal("bind")
             .then(Commands.argument("targets", ArgumentTypes.players())
                     .then(Commands.literal("add")
@@ -42,12 +44,13 @@ public class BindCmd {
                                                 JsonObject bind = new JsonObject();
                                                 bind.addProperty("key", key);
                                                 bind.addProperty("replace", _replace);
+                                                ConfigFile CHAT_REPLACEMENTS = ownerPlugin.getConfigManager().getConfig(Key.key("drng:chat_replacements"));
+
                                                 if (!CHAT_REPLACEMENTS.has(targetName))
                                                     CHAT_REPLACEMENTS.addKey(targetName, new JsonArray());
                                                 CHAT_REPLACEMENTS.getKey(targetName).getAsJsonArray().add(bind);
                                             }
                                         }
-                                        CHAT_REPLACEMENTS.write();
                                         context.getSource().getSender().sendMessage(Component.text("添加成功"));
                                         return 0;
                                     }))))
@@ -78,6 +81,7 @@ public class BindCmd {
                                         JsonObject bind = new JsonObject();
                                         bind.addProperty("key",key);
                                         bind.addProperty("replace",_replace);
+                                        ConfigFile CHAT_REPLACEMENTS = ownerPlugin.getConfigManager().getConfig(Key.key("drng:chat_replacements"));
                                         if(!CHAT_REPLACEMENTS.has(targetName))
                                             CHAT_REPLACEMENTS.addKey(targetName,new JsonArray());
                                         CHAT_REPLACEMENTS.getKey(targetName).getAsJsonArray().add(bind);
@@ -99,9 +103,10 @@ public class BindCmd {
             .requires(commandSourceStack -> commandSourceStack.getSender() instanceof Player);
     public static LiteralCommandNode<CommandSourceStack> bindCmd = bindCmdBuilder.build();
     private static Component getPlayerBinds(Player player){
-        CHAT_REPLACEMENTS.reload();
         Component component = Component.empty();
         int idx = 1;
+        ConfigFile CHAT_REPLACEMENTS = ownerPlugin.getConfigManager().getConfig(Key.key("drng:chat_replacements"));
+
         for(JsonElement element : CHAT_REPLACEMENTS.getKey(player.getName()).getAsJsonArray()){
             if(element.getAsJsonObject().has("removed")) continue;
             String key = element.getAsJsonObject().get("key").getAsString();
@@ -120,7 +125,6 @@ public class BindCmd {
                                         .append(Component.text(ii,TextColor.color(Color.RED.getRGB())))
                                         .append(Component.space())
                                         .append(Component.text("号")));
-                                CHAT_REPLACEMENTS.write();
                             }, ClickCallback.Options.builder().lifetime(Duration.ofSeconds(30)).build())))
                     .append(Component.newline());
             idx++;

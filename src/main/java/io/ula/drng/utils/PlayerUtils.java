@@ -2,7 +2,10 @@ package io.ula.drng.utils;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import io.ula.drng.Main;
 import io.ula.drng.ScoreBoardHelper;
+import io.ula.drng.config.ConfigFile;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -21,9 +24,10 @@ import static org.bukkit.Bukkit.getServer;
 
 public class PlayerUtils {
     private static final Logger LOGGER = LogManager.getLogger();
+    public static Main ownerPlugin;
     public static Component getPlayerTitles(Player player) {
-        PLAYER_TITLES.reload();
         Component component = Component.empty();
+        ConfigFile PLAYER_TITLES = ownerPlugin.getConfigManager().getConfig(Key.key("drng:titles"));
         if(PLAYER_TITLES.has(player.getName())) {
             try {
                 for (JsonElement title : PLAYER_TITLES.getKey(player.getName()).getAsJsonArray()) {
@@ -53,7 +57,7 @@ public class PlayerUtils {
     }
 
     public static String getPlayerChatMsg(String message,Player player){
-        CHAT_REPLACEMENTS.reload();
+        ConfigFile CHAT_REPLACEMENTS = ownerPlugin.getConfigManager().getConfig(Key.key("drng:chat_replacements"));
         if(!CHAT_REPLACEMENTS.has(player.getName()))
             CHAT_REPLACEMENTS.addKey(player.getName(),new JsonArray());
         JsonArray array = CHAT_REPLACEMENTS.getKey(player.getName()).getAsJsonArray();
@@ -80,11 +84,11 @@ public class PlayerUtils {
                 }
             }
         }
-        CHAT_REPLACEMENTS.write();
         return  message;
     }
 
     public static Component getPlayerLoginMsg(Player player){
+        ConfigFile PLAYER_TITLES = ownerPlugin.getConfigManager().getConfig(Key.key("drng:titles"));
         if(player.isOp())
             return  Component.empty();
         Component loginMsg = Component.text("");
@@ -105,14 +109,6 @@ public class PlayerUtils {
         }
     }
 
-    public static void balanceFunction(){
-        for(Player player : getServer().getOnlinePlayers()){
-            if(player.isOp() && CONFIG.getKey("balancedOp").getAsBoolean())
-                player.setGameMode(GameMode.SPECTATOR);
-            if(player.getGameMode().equals(GameMode.CREATIVE) && !CONFIG.getKey("allowCreativeMode").getAsBoolean())
-                player.setGameMode(GameMode.SURVIVAL);
-        }
-    }
 
     public static void initPlayerStatus(Player player,JavaPlugin plugin){
         player.setMetadata("onlineTime",new FixedMetadataValue(plugin,0));
@@ -120,7 +116,13 @@ public class PlayerUtils {
             player.setMetadata("deathCount", new FixedMetadataValue(plugin,0));
         if(!player.hasMetadata("digCount"))
             player.setMetadata("digCount", new FixedMetadataValue(plugin,0));
+        if(!player.hasMetadata("speedrunner"))
+            player.setMetadata("speedrunner", new FixedMetadataValue(plugin,0));
+        if(!player.hasMetadata("hunter"))
+            player.setMetadata("hunter", new FixedMetadataValue(plugin,0));
         //init Metadata
+
+        ConfigFile CONFIG = ownerPlugin.getConfigManager().getConfig(Key.key("drng:main"));
 
         if(player.isOp()&&CONFIG.getKey("balancedOp").getAsBoolean()) player.setGameMode(GameMode.SPECTATOR);
         if (player.getGameMode().equals(GameMode.SPECTATOR) && !player.isOp())
