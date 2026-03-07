@@ -29,8 +29,6 @@ public final class Main extends JavaPlugin {
         eventRegister();
         startTasks();
         //主插件
-        io.ula.hg.HgMain.init(this);
-        //猎人游戏
     }
 
     @Override
@@ -41,7 +39,6 @@ public final class Main extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new PlayerBehaviourListener(this),this);
         this.getServer().getPluginManager().registerEvents(new ServerJoinListener(this),this);
         //主插件
-        this.getServer().getPluginManager().registerEvents(new io.ula.hg.HgPlayerListener(this),this);
     }
 
     public ConfigManager getConfigManager(){

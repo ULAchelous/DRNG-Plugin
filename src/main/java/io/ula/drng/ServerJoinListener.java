@@ -90,18 +90,6 @@ public class ServerJoinListener implements Listener {
 
         PlayerUtils.initPlayerStatus(player,plugin);
 
-
-        HgUtils.hgPreProcess(plugin,player);
-
-        if(CONFIG.getKey("hg_finished").getAsBoolean())
-            ScoreBoardHelper.createObjective(player);
-        else
-            ScoreBoardHelper.createHgObjective(player);
-
-        if(player.getName().equals("zyl"))
-            player.setMetadata("speedrunner",new FixedMetadataValue(plugin,true));
-        else
-            player.setMetadata("hunter",new FixedMetadataValue(plugin,true));
     }
     private void setConnectionJoinResult(UUID uniqueId, boolean value) {
         CompletableFuture<Boolean> future = awaitResponse.get(uniqueId);
