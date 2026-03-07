@@ -54,6 +54,7 @@ public class DrngBootstrap implements PluginBootstrap {
             commands.registrar().register(TpaCmd.tpaCmd);
             commands.registrar().register(HomeCmd.homeCmd);
             commands.registrar().register(BindCmd.bindCmd);
+            commands.registrar().register(ConfigCmd.configCmd);
         });//注册命令
 
         context.getLifecycleManager().registerEventHandler(RegistryEvents.DIALOG.compose()

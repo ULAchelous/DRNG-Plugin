@@ -35,7 +35,6 @@ public class ConfigManager {
                     this.LOGGER.error(e.getMessage());
                 }
                 if(pluginStopped == true){
-                    saveAll();
                     return;
                 }
                 saveAll();
@@ -84,7 +83,7 @@ public class ConfigManager {
         lock.writeLock().lock();
         for (Map.Entry<Key, ConfigFile> entry : configs.entrySet()) {
             entry.getValue().reload();
-            LOGGER.info(String.format("Saved Change to \"%s\"",entry.getValue().getName()));
+            LOGGER.info(String.format("Reloaded \"%s\"",entry.getValue().getName()));
         }
         lock.writeLock().unlock();
     }
@@ -103,6 +102,7 @@ public class ConfigManager {
 
     public void onDisabled(){
         autoSave.stop();
+        saveAll();
         for(ConfigFile configFile : autoRemove){
             configFile.removeFile();
         }

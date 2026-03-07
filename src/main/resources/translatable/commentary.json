@@ -1,4 +1,9 @@
 {
+  "commentary.enter_the_nether": "%s率先到达下界！",
+  "commentary.enter_the_end": "覆水难收",
+  "commentary.kill_at_end": "覆水难收...吗？",
+  "commentary.kill_speedrunner.1": "速通者%s被击杀了! ",
+  "commentary.kill_speedrunner.2": "很不巧看来%s他已经...死了",
   "commentary.game_end.1":"真是精彩的比赛！",
   "commentary.game_end.2": "接下来我会重置服务器场地，这样你们就可以玩生存了。",
   "commentary.game_end.3": "服务器会离线一会儿。",

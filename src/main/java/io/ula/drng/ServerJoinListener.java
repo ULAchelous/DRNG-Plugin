@@ -82,7 +82,7 @@ public class ServerJoinListener implements Listener {
     }
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        ConfigFile CONFIG = plugin.getConfigManager().getConfig(Key.key("drng:titles"));
+        ConfigFile CONFIG = plugin.getConfigManager().getConfig(Key.key("drng:main"));
 
         Player player = event.getPlayer();
 
@@ -91,14 +91,14 @@ public class ServerJoinListener implements Listener {
         PlayerUtils.initPlayerStatus(player,plugin);
 
 
-        HgUtils.hgPreProcess(plugin,player);
-
         if(CONFIG.getKey("hg_finished").getAsBoolean())
             ScoreBoardHelper.createObjective(player);
-        else
+        else {
             ScoreBoardHelper.createHgObjective(player);
+            HgUtils.hgPreProcess(plugin,player);
+        }
 
-        if(player.getName().equals("zyl"))
+        if(player.getName().equals("lifedownlaodpjy") || player.getName().equals("Crasher_01nch"))
             player.setMetadata("speedrunner",new FixedMetadataValue(plugin,true));
         else
             player.setMetadata("hunter",new FixedMetadataValue(plugin,true));

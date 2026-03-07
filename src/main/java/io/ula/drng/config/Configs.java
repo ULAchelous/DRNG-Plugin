@@ -18,17 +18,6 @@ public class Configs {
         public static final String INLINE_TRANSLATABLE= "translatable";
     }
 
-//    public static ConfigFile PMS_CODES;
-//    public static ConfigFile DRNG_PERMISSIONS;
-//    public static ConfigFile PLAYER_TITLES ;
-//    public static ConfigFile DRNG_TIPS;
-//    public static ConfigFile DRNG_NOTICES;
-//    public static ConfigFile LOG_CMD;
-//    public static ConfigFile PLAYER_HOMES;
-//    public static ConfigFile CHAT_REPLACEMENTS;
-//    public static ConfigFile PLAYER_EULA;
-//    public static ConfigFile CONFIG;
-//    public static InlineConfigFile COMMENTARY;
     public static void init(Main ownerPlugin){
         String version = ownerPlugin.getPluginMeta().getVersion();
         JsonObject mainConfigs = new JsonObject();
@@ -37,6 +26,7 @@ public class Configs {
         mainConfigs.addProperty("allowCreativeMode",false);
         mainConfigs.addProperty("balancedOp",true);
         mainConfigs.addProperty("hg_finished",false);
+        mainConfigs.addProperty("hg_started",false);
         log_cmd.addProperty("version",version);
         log_cmd.add("commands",new JsonArray());
 

@@ -1,6 +1,7 @@
 package io.ula.drng.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.ula.drng.Main;
@@ -24,4 +25,5 @@ public class ConfigCmd {
                         return 0;
                     }
             ));
+    public static LiteralCommandNode<CommandSourceStack> configCmd = configCmdBuilder.build();
 }

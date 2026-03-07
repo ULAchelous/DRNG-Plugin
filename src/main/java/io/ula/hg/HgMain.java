@@ -3,9 +3,11 @@ package io.ula.hg;
 import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.LodestoneTracker;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,6 +23,7 @@ public class HgMain {
     private static JavaPlugin ownerPlugin;
     public static void init(JavaPlugin plugin){
         ownerPlugin = plugin;
+        Bukkit.getWorld(Key.key("minecraft:overworld")).getWorldBorder().setSize(1);
         startTasks();
     }
     private static void startTasks(){

@@ -124,8 +124,8 @@ public class PlayerUtils {
 
         ConfigFile CONFIG = ownerPlugin.getConfigManager().getConfig(Key.key("drng:main"));
 
-        if(player.isOp()&&CONFIG.getKey("balancedOp").getAsBoolean()) player.setGameMode(GameMode.SPECTATOR);
         if (player.getGameMode().equals(GameMode.SPECTATOR) && !player.isOp())
             player.setGameMode(GameMode.SURVIVAL);
+        if(player.isOp()&&CONFIG.getKey("balancedOp").getAsBoolean()) player.setGameMode(GameMode.SPECTATOR);
     }
 }
