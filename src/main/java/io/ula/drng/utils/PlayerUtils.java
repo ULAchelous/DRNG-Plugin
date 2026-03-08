@@ -116,10 +116,6 @@ public class PlayerUtils {
             player.setMetadata("deathCount", new FixedMetadataValue(plugin,0));
         if(!player.hasMetadata("digCount"))
             player.setMetadata("digCount", new FixedMetadataValue(plugin,0));
-        if(!player.hasMetadata("speedrunner"))
-            player.setMetadata("speedrunner", new FixedMetadataValue(plugin,0));
-        if(!player.hasMetadata("hunter"))
-            player.setMetadata("hunter", new FixedMetadataValue(plugin,0));
         //init Metadata
 
         ConfigFile CONFIG = ownerPlugin.getConfigManager().getConfig(Key.key("drng:main"));

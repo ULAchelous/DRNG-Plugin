@@ -96,6 +96,8 @@ public class HomeCmd {
     static Component getPlayerHomes(Player player,Boolean flag){
         Component component = Component.empty();
         ConfigFile PLAYER_HOMES = ownerPlugin.getConfigManager().getConfig(Key.key("drng:homes"));
+        if(!PLAYER_HOMES.has(player.getName()))
+            PLAYER_HOMES.addKey(player.getName(), new JsonArray());
         for(int idx = 0;idx<PLAYER_HOMES.getKey(player.getName()).getAsJsonArray().size();idx++) {
             JsonElement element = PLAYER_HOMES.getKey(player.getName()).getAsJsonArray().get(idx);
             if(element.getAsJsonObject().has("removed")) {

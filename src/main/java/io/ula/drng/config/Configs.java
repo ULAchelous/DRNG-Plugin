@@ -36,7 +36,6 @@ public class Configs {
         mainConfigs.addProperty("version",version);
         mainConfigs.addProperty("allowCreativeMode",false);
         mainConfigs.addProperty("balancedOp",true);
-        mainConfigs.addProperty("hg_finished",false);
         log_cmd.addProperty("version",version);
         log_cmd.add("commands",new JsonArray());
 

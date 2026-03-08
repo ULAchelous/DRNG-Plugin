@@ -90,17 +90,12 @@ public class PlayerBehaviourListener implements Listener {
     @EventHandler
     public void onPlayerSendingMessages(AsyncChatEvent event){
             Player player = event.getPlayer();
-            ConfigFile CONFIG = plugin.getConfigManager().getConfig(Key.key("drng:main"));
-            if(CONFIG.getKey("hg_finished").getAsBoolean()) {
-                Component message = Component.object(ObjectContents.playerHead(player.getUniqueId()))
-                        .append(Component.space())
-                        .append(PlayerUtils.getPlayerTitles(player))//添加头衔
-                        .append(Component.text(String.format("<%s> ", player.getName())))
-                        .append(Component.text(PlayerUtils.getPlayerChatMsg(LegacyComponentSerializer.legacyAmpersand().serialize(event.message()), player)));
-                player.getServer().sendMessage(message);
-            }else{
-                player.sendMessage(Component.text("聊天栏已经禁用",TextColor.color(Color.RED.getRGB())));
-            }
+            Component message = Component.object(ObjectContents.playerHead(player.getUniqueId()))
+                    .append(Component.space())
+                    .append(PlayerUtils.getPlayerTitles(player))//添加头衔
+                    .append(Component.text(String.format("<%s> ", player.getName())))
+                    .append(Component.text(PlayerUtils.getPlayerChatMsg(LegacyComponentSerializer.legacyAmpersand().serialize(event.message()), player)));
+            player.getServer().sendMessage(message);
             event.setCancelled(true);
     }
 
