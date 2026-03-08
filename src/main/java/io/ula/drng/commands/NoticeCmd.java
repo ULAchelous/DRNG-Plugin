@@ -22,7 +22,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-import static io.ula.drng.config.Configs.*;
 
 public class NoticeCmd {
     public static Main ownerPlugin;
@@ -44,6 +43,7 @@ public class NoticeCmd {
             )
             .requires(commandSourceStack -> (commandSourceStack.getSender() instanceof Player));
     public static LiteralCommandNode<CommandSourceStack> noticeCmd = noticeCmdBuilder.build();
+
     public static Book getNoticeBook(){
         Book.Builder book = Book.book(Component.text("公告栏"),Component.text("Server")).toBuilder();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")

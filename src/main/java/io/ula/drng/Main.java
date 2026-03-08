@@ -7,12 +7,15 @@ import io.ula.drng.config.ConfigManager;
 import io.ula.drng.config.Configs;
 import io.ula.drng.utils.PlayerUtils;
 import io.ula.drng.utils.TBUtils;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import java.util.concurrent.CompletableFuture;
+
 
 public final class Main extends JavaPlugin {
-    private final String PLG_ID = "dr-ng";
     private ConfigManager configManager = DrngBootstrap.configManager;
     @Override
     public void onEnable() {
@@ -33,13 +36,15 @@ public final class Main extends JavaPlugin {
 
     @Override
     public void onDisable(){
-        this.configManager.onDisabled();
+        CompletableFuture<Void> saveTask = CompletableFuture.runAsync(() -> this.configManager.onDisabled());
+        saveTask.join();
     }
     private void eventRegister(){
         this.getServer().getPluginManager().registerEvents(new PlayerBehaviourListener(this),this);
         this.getServer().getPluginManager().registerEvents(new ServerJoinListener(this),this);
         //主插件
     }
+
 
     public ConfigManager getConfigManager(){
         return this.configManager;
@@ -52,9 +57,3 @@ public final class Main extends JavaPlugin {
         scheduler.runTaskTimer(this, () -> PlayerUtils.playerUpdateOnlineTime(this) ,60*20,60*20);
     }
 }
-/*
-TODO:滚动公告栏
-TODO:更多配置项
-TODO:优化PLG_ID与VERSION
-TODO:配置文件初始内容
- */

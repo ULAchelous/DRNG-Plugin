@@ -51,6 +51,5 @@ public class Configs {
         configManager.register(Key.key("drng:homes"),new ConfigFile("player_homes.json",ConfigPath.PLAYER,null,ownerPlugin));
         configManager.register(Key.key("drng:chat_replacements"),new ConfigFile("chat_replacements.json",ConfigPath.PLAYER,null,ownerPlugin));
         configManager.register(Key.key("drng:eula"),new ConfigFile("player_eula.json",ConfigPath.PLAYER,null,ownerPlugin));
-        configManager.register(Key.key("drng:commentary"),new InlineConfigFile(ConfigPath.INLINE_TRANSLATABLE,"commentary.json",ownerPlugin));
     }
 }

@@ -108,10 +108,11 @@ public class PlayerBehaviourListener implements Listener {
     public void onPlayerSwitchGamemode(PlayerGameModeChangeEvent event){
         Player player = event.getPlayer();
         ConfigFile CONFIG = plugin.getConfigManager().getConfig(Key.key("drng:main"));
-        if(player.isOp() && CONFIG.getKey("balancedOp").getAsBoolean()) {
+        if(player.isOp() && CONFIG.getKey("balancedOp").getAsBoolean() && !event.getNewGameMode().equals(GameMode.SPECTATOR)) {
+            player.setGameMode(GameMode.SPECTATOR);
             event.setCancelled(true);
         }
-        if(player.getGameMode().equals(GameMode.CREATIVE) && !CONFIG.getKey("allowCreativeMode").getAsBoolean()) {
+        if(event.getNewGameMode().equals(GameMode.CREATIVE) && !CONFIG.getKey("allowCreativeMode").getAsBoolean()) {
             event.setCancelled(true);
         }
     }

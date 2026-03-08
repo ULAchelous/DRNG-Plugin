@@ -8,7 +8,7 @@ import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import io.ula.drng.config.ConfigFile;
 import io.ula.drng.utils.PlayerUtils;
-import io.ula.hg.HgUtils;
+import io.ula.drng.utils.TBUtils;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.dialog.DialogLike;
 import net.kyori.adventure.key.Key;
@@ -82,7 +82,6 @@ public class ServerJoinListener implements Listener {
     }
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        ConfigFile CONFIG = plugin.getConfigManager().getConfig(Key.key("drng:titles"));
 
         Player player = event.getPlayer();
 
@@ -90,6 +89,10 @@ public class ServerJoinListener implements Listener {
 
         PlayerUtils.initPlayerStatus(player,plugin);
 
+        ScoreBoardHelper.createObjective(player);
+        
+        if(TBUtils.getFlowingNoticeBoard()!=null)
+            player.sendMessage(TBUtils.getFlowingNoticeBoard());
     }
     private void setConnectionJoinResult(UUID uniqueId, boolean value) {
         CompletableFuture<Boolean> future = awaitResponse.get(uniqueId);

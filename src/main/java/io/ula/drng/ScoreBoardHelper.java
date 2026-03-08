@@ -23,7 +23,7 @@ public class ScoreBoardHelper {
     }
     public static void createObjective(Player player){
         Scoreboard scoreboard = scoreboardManager.getNewScoreboard();
-        Component server_name = Component.text("希望之地").color(TextColor.fromCSSHexString("#00CCFF"))
+        Component server_name = Component.text("希").color(TextColor.fromCSSHexString("#00CCFF"))
                 .append(Component.text("望").color(TextColor.fromCSSHexString("#0099CC")))
                 .append(Component.text("之").color(TextColor.fromCSSHexString("#006699")))
                 .append(Component.text("地").color(TextColor.fromCSSHexString("#003366")))
